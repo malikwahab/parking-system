@@ -13,12 +13,15 @@ class Mall(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.name
+
 
 class ParkingTicket(models.Model):
     plate_number = models.CharField(max_length=9,
                                     validators=[plate_number_validator])
     entry_time = models.DateTimeField(auto_now_add=True)
-    exit_time = models.DateTimeField(blank=True)
+    exit_time = models.DateTimeField(blank=True, null=True)
     fee_paid = models.FloatField(default=0.0)
     status = models.CharField(choices=STATUS, default="parked", max_length=7)
     date_modified = models.DateTimeField(auto_now=True)
