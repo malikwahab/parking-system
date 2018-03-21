@@ -56,5 +56,3 @@ class ParkingTicketViewSetTest(APITestCase):
         # assert error message
         self.assertIn("Plate Number are in the format ABC-123DE",
                       str(response.content))  # cast byte object to string
-    
-    

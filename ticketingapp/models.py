@@ -61,7 +61,7 @@ class ParkingTicket(models.Model):
             self.exit_time = timezone.now()
             self.save()
         return can_exit
-    
+
     def pay_ticket(self, amount):
         self.fee_paid += amount
         self.save()
