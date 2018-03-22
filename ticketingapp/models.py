@@ -7,7 +7,7 @@ from django.utils import timezone
 # Create your models here.
 
 plate_number_validator = RegexValidator("([A-Za-z]{3}\-\d{3}[A-Za-z]{2})", "Plate Number are in the format ABC-123DE")
-STATUS = [('0', 'parked'), ('1', 'exited')]
+STATUS = [('parked', 'parked'), ('exited', 'exited')]
 
 
 class Mall(models.Model):
@@ -29,7 +29,7 @@ class ParkingTicket(models.Model):
     fee_paid = models.FloatField(default=0.0)
     status = models.CharField(choices=STATUS, default="parked", max_length=7)
     date_modified = models.DateTimeField(auto_now=True)
-    mall = models.ForeignKey(Mall, related_name="mall", on_delete=models.CASCADE)
+    mall = models.ForeignKey(Mall, related_name="parkingtickets", on_delete=models.CASCADE)
 
     def get_ticket_fee(self):
         THIRTY_MIN = 1800

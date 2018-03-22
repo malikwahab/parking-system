@@ -1,8 +1,10 @@
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework import filters
 
 from ticketingapp.models import ParkingTicket, Mall
 from ticketingapp.serializers import ParkingTicketSerializer, MallSerializer
@@ -20,6 +22,12 @@ class ParkingTicketViewSet(ModelViewSet):
 
     serializer_class = ParkingTicketSerializer
     queryset = ParkingTicket.objects.all()
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter,)
+    filter_fields = ('status',)
+    search_fields = ('plate_number',)
+
+    def get_object(self):
+        pass
 
 
 @api_view(['POST'])
@@ -37,4 +45,5 @@ def exit_park(request, ticket_id):
     if parkingticket.exit_park():
         serializer = ParkingTicketSerializer(parkingticket)
         return Response(serializer.data)
-    return Response({'message': 'Outstanding payment, can\'t exit park'}, status=status.HTTP_400_BAD_REQUEST)
+    return Response({'message': 'Outstanding payment, can\'t exit park'},
+                    status=status.HTTP_400_BAD_REQUEST)
