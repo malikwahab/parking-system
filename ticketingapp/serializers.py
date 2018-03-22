@@ -13,8 +13,8 @@ class ParkingTicketSerializer(serializers.ModelSerializer):
     )
 
     def create(self, validated_data):
-        mall = validated_data['mall']
-        tenant = validated_data['tenant']
+        mall = validated_data.get('mall')
+        tenant = validated_data.get('tenant')
         if mall.is_parked(validated_data['plate_number']):
             raise serializers.ValidationError('This car is already parked!')
         if not mall.has_space():

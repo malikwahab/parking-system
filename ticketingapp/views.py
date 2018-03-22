@@ -13,13 +13,18 @@ from ticketingapp.serializers import ParkingTicketSerializer, MallSerializer, Te
 
 
 class MallViewSet(ModelViewSet):
-
+    """
+    This endpoint presents the malls in the System
+    """
     serializer_class = MallSerializer
     queryset = Mall.objects.all()
 
 
 class ParkingTicketViewSet(ModelViewSet):
-
+    """
+    This endpoint presents the parking tickets,
+    Contains all endpoint for managing tickets
+    """
     serializer_class = ParkingTicketSerializer
     queryset = ParkingTicket.objects.all()
     filter_backends = (DjangoFilterBackend, filters.SearchFilter,)
@@ -40,6 +45,10 @@ class TenantViewset(ModelViewSet):
 
 @api_view(['POST'])
 def pay_ticket(request, ticket_id):
+    """
+    This endpoint is to make payment for parking tickets
+    You can also make partial payment
+    """
     parkingticket = get_object_or_404(ParkingTicket, pk=ticket_id)
     parkingticket.checkout()  # TODO: refactore checkout logic
     parkingticket.pay_ticket(request.data['fee_paid'])
@@ -49,9 +58,14 @@ def pay_ticket(request, ticket_id):
 
 @api_view(['GET'])
 def exit_park(request, ticket_id):
+    """
+    This endpoint is to make exit the park. Throws error if there
+    is outstanding payment on the ticket
+    """
     parkingticket = get_object_or_404(ParkingTicket, pk=ticket_id)
     if parkingticket.exit_park():
-        serializer = ParkingTicketSerializer(parkingticket, context={'request': request})
+        serializer = ParkingTicketSerializer(
+            parkingticket, context={'request': request})
         return Response(serializer.data)
     return Response({'message': 'Outstanding payment, can\'t exit park'},
                     status=status.HTTP_400_BAD_REQUEST)
@@ -59,6 +73,10 @@ def exit_park(request, ticket_id):
 
 @api_view(['GET'])
 def payment_details(request, mall_id):
+    """
+    This endpoint presents the payment information on a mall. It accepts
+    query param "days" to limit the calculated fee to since days specified
+    """
     mall = get_object_or_404(Mall, pk=mall_id)
     serializer = MallSerializer(mall, context={'request': request})
     days = request.query_params.get('days', [None])[0]

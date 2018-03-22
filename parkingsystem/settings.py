@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     # Installed apps
     'rest_framework',
     'django_filters',
+    'rest_framework_swagger',
     'ticketingapp.apps.TicketingappConfig'
 ]
 
