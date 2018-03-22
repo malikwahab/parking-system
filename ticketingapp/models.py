@@ -59,6 +59,19 @@ class Mall(models.Model):
         return self.name
 
 
+class Tenant(models.Model):
+    name = models.CharField(max_length=100)
+    malls = models.ManyToManyField(Mall, related_name='tenants')
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['name'])
+        ]
+
+
 class ParkingTicket(models.Model):
     plate_number = models.CharField(max_length=9,
                                     validators=[plate_number_validator])
@@ -68,7 +81,11 @@ class ParkingTicket(models.Model):
     fee_paid = models.FloatField(default=0.0)
     status = models.CharField(choices=STATUS, default="parked", max_length=7)
     date_modified = models.DateTimeField(auto_now=True)
-    mall = models.ForeignKey(Mall, related_name="parkingtickets", on_delete=models.CASCADE)
+    mall = models.ForeignKey(
+        Mall, related_name="parkingtickets", on_delete=models.CASCADE)
+    tenant = models.ForeignKey(
+        Tenant, related_name='tenant_parkingtickets', on_delete=models.CASCADE,
+        blank=True, null=True)
 
     def get_ticket_fee(self):
         THIRTY_MIN = 1800
