@@ -9,16 +9,31 @@ from ticketingapp.models import Mall
 
 class MallViewSetTest(APITestCase):
 
-    def test_mall_create(self):
-        client = APIClient()
+    def setUp(self):
+        self.client = APIClient()
+        self.mall = Mall.objects.create(name='Marryland')
+
+    def test_can_create_mall(self):
         url = reverse('mall-list')
-        response = client.post(url, data={'name': 'ICM'})
+        response = self.client.post(url, data={'name': 'ICM'})
 
         # assert status code for created
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # assert data returned contains mall
         self.assertEqual(response.data['name'], 'ICM')
+
+    def test_can_get_mall(self):
+        url = reverse('mall-detail', kwargs={'pk': self.mall.id})
+        response = self.client.get(url)
+
+        # test mall returned
+        self.assertEqual(response.data['name'], self.mall.name)
+
+    def test_can_edit_mall(self):
+        url = reverse('mall-detail', kwargs={'pk': self.mall.id})
+        response = self.client.put(url, kwargs={'name': 'Ikeja City Mall'})
+        self.assertEqual(response.data['name'], self.mall.name)
 
 
 class ParkingTicketViewSetTest(APITestCase):
@@ -34,7 +49,7 @@ class ParkingTicketViewSetTest(APITestCase):
             'mall': self.mall.id
         }
         response = self.client.post(url, data=data)
-        
+
         # assert status code for created
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 

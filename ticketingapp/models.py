@@ -39,7 +39,7 @@ class Mall(models.Model):
             plate_number=plate_number, status=STATUS[0][1])
         return parked.exists()
 
-    def get_amount_paid(self, days):
+    def get_amount_paid(self, days=None):
         def sum_fee_paid(x, y):
             a = x.fee_paid if issubclass(type(x), models.Model) else x
             b = y.fee_paid if issubclass(type(y), models.Model) else y
@@ -47,7 +47,7 @@ class Mall(models.Model):
         parkingtickets = self.get_days_specific_parkingtickets(days)
         return functools.reduce(sum_fee_paid, parkingtickets, 0.0)
 
-    def get_amount_owned(self, days):
+    def get_amount_owned(self, days=None):
         def sum_amount_owned(x, y):
             a = x.amount_owed() if issubclass(type(x), models.Model) else x
             b = y.amount_owed() if issubclass(type(y), models.Model) else y

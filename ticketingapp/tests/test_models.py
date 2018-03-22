@@ -105,3 +105,39 @@ class TestParkingTicket(TestCase):
 
         # assert can exit store
         self.assertTrue(self.parkingticket.exit_park())
+
+
+class TestMall(TestCase):
+
+    def setUp(self):
+        self.mall = Mall.objects.create(
+            name='ICM', maximum_no_cars=2)
+        self.parkingticket = ParkingTicket.objects.create(
+            plate_number="ABC-123ED",
+            mall=self.mall
+        )
+
+    def test_has_space(self):
+        # assert has space
+        self.assertTrue(self.mall.has_space())
+        
+        ParkingTicket.objects.create(
+            plate_number="ZYX-984SD",
+            mall=self.mall
+        )
+
+        # assert no space
+        self.assertFalse(self.mall.has_space())
+
+    def test_is_parked(self):
+        # assert car is parked
+        self.assertTrue(self.mall.is_parked('ABC-123ED'))
+
+        # assert car is not parked
+        self.assertFalse(self.mall.is_parked('ZXC-456LK'))
+    
+    def test_amount_paid(self):
+        self.parkingticket.pay_ticket(300)
+
+        # assert amount paid
+        self.assertEqual(self.mall.get_amount_paid(), 300)

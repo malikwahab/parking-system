@@ -5,6 +5,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import filters
+from rest_framework import mixins
 
 from ticketingapp.models import ParkingTicket, Mall, Tenant
 from ticketingapp.serializers import ParkingTicketSerializer, MallSerializer, TenantSerializer
@@ -12,7 +13,14 @@ from ticketingapp.serializers import ParkingTicketSerializer, MallSerializer, Te
 # Create your views here.
 
 
-class MallViewSet(ModelViewSet):
+class PartialPutMixin(mixins.UpdateModelMixin):
+    # force PUT to be a partial update
+    def update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return super().update(request, *args, **kwargs)
+
+
+class MallViewSet(ModelViewSet, PartialPutMixin):
     """
     This endpoint presents the malls in the System
     """
@@ -20,7 +28,7 @@ class MallViewSet(ModelViewSet):
     queryset = Mall.objects.all()
 
 
-class ParkingTicketViewSet(ModelViewSet):
+class ParkingTicketViewSet(ModelViewSet, PartialPutMixin):
     """
     This endpoint presents the parking tickets,
     Contains all endpoint for managing tickets
