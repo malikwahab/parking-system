@@ -5,7 +5,6 @@ from ticketingapp.models import ParkingTicket, Mall
 
 
 class ParkingTicketSerializer(serializers.ModelSerializer):
-    
     # accumulated_ticket_fee
     ticket_fee = serializers.ReadOnlyField(source='amount_owed')
 
@@ -24,15 +23,19 @@ class ParkingTicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = ParkingTicket
         fields = ('plate_number', 'entry_time', 'date_modified',
-                  'exit_time', 'fee_paid', 'status', 'mall', 'ticket_fee', 'url')
+                  'exit_time', 'fee_paid', 'status', 'mall', 'ticket_fee',
+                  'url')
         read_only_fields = ('exit_time', 'fee_paid', 'status',)
 
 
 class MallSerializer(serializers.ModelSerializer):
+    parkingtickets_url = serializers.HyperlinkedIdentityField(
+        view_name='mall-parkingtickets-list',
+        lookup_field='pk',
+        lookup_url_kwarg='mall_pk'
+    )
 
-    parkingtickets = ParkingTicketSerializer(many=True, read_only=True)
-    
     class Meta:
         model = Mall
         fields = ('name', 'maximum_no_cars', 'date_created', 'date_modified',
-                  'parkingtickets', )
+                  'parkingtickets_url',)

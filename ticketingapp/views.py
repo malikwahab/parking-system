@@ -13,7 +13,7 @@ from ticketingapp.serializers import ParkingTicketSerializer, MallSerializer
 
 
 class MallViewSet(ModelViewSet):
-    
+
     serializer_class = MallSerializer
     queryset = Mall.objects.all()
 
@@ -25,6 +25,12 @@ class ParkingTicketViewSet(ModelViewSet):
     filter_backends = (DjangoFilterBackend, filters.SearchFilter,)
     filter_fields = ('status',)
     search_fields = ('plate_number',)
+
+
+class MallParkingTicketViewSet(ParkingTicketViewSet):
+
+    def get_queryset(self):
+        return ParkingTicket.objects.filter(mall=self.kwargs['mall_pk'])
 
 
 @api_view(['POST'])
@@ -44,3 +50,15 @@ def exit_park(request, ticket_id):
         return Response(serializer.data)
     return Response({'message': 'Outstanding payment, can\'t exit park'},
                     status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def payment_details(request, mall_id):
+    mall = get_object_or_404(Mall, pk=mall_id)
+    serializer = MallSerializer(mall, context={'request': request})
+    days = request.query_params.get('days', [None])[0]
+    return Response({
+        'paid': mall.get_amount_paid(days),
+        'owned': mall.get_amount_owned(days),
+        'mall': serializer.data
+    })

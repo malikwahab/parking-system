@@ -1,4 +1,6 @@
 import math
+import functools
+from datetime import timedelta
 
 from django.db import models
 from django.core.validators import RegexValidator
@@ -17,15 +19,38 @@ class Mall(models.Model):
     date_modified = models.DateTimeField(auto_now=True)
 
     def has_space(self):
-        ''' Check if currently parked cars are not more than maximum_no_cars
+        '''Check if currently parked cars are not more than
+        maximum_no_cars
         '''
         parked_cars = self.parkingtickets.filter(status=STATUS[0][1])
         return parked_cars.count() < (self.maximum_no_cars)
-    
+
+    def get_days_specific_parkingtickets(self, days=None):
+        if not days:
+            return self.parkingtickets.all()
+        parked_time = timezone.now() - timedelta(days=int(days))
+        return self.parkingtickets.filter(entry_time__lte=parked_time)
+
     def is_parked(self, plate_number):
         parked = self.parkingtickets.filter(
             plate_number=plate_number, status=STATUS[0][1])
         return parked.exists()
+
+    def get_amount_paid(self, days):
+        def sum_fee_paid(x, y):
+            a = x.fee_paid if issubclass(type(x), models.Model) else x
+            b = y.fee_paid if issubclass(type(y), models.Model) else y
+            return a + b
+        parkingtickets = self.get_days_specific_parkingtickets(days)
+        return functools.reduce(sum_fee_paid, parkingtickets, 0.0)
+
+    def get_amount_owned(self, days):
+        def sum_amount_owned(x, y):
+            a = x.amount_owed() if issubclass(type(x), models.Model) else x
+            b = y.amount_owed() if issubclass(type(y), models.Model) else y
+            return a + b
+        parkingtickets = self.get_days_specific_parkingtickets(days)
+        return functools.reduce(sum_amount_owned, parkingtickets, 0.0)
 
     def __str__(self):
         return self.name
