@@ -26,9 +26,6 @@ class ParkingTicketViewSet(ModelViewSet):
     filter_fields = ('status',)
     search_fields = ('plate_number',)
 
-    def get_object(self):
-        pass
-
 
 @api_view(['POST'])
 def pay_ticket(request, ticket_id):

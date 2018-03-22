@@ -16,6 +16,17 @@ class Mall(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
 
+    def has_space(self):
+        ''' Check if currently parked cars are not more than maximum_no_cars
+        '''
+        parked_cars = self.parkingtickets.filter(status=STATUS[0][1])
+        return parked_cars.count() < (self.maximum_no_cars)
+    
+    def is_parked(self, plate_number):
+        parked = self.parkingtickets.filter(
+            plate_number=plate_number, status=STATUS[0][1])
+        return parked.exists()
+
     def __str__(self):
         return self.name
 

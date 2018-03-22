@@ -13,6 +13,14 @@ class ParkingTicketSerializer(serializers.ModelSerializer):
         view_name='parkingticket-detail'
     )
 
+    def create(self, validated_data):
+        mall = validated_data['mall']
+        if mall.is_parked(validated_data['plate_number']):
+            raise serializers.ValidationError('This car is already parked!')
+        if not mall.has_space():
+            raise serializers.ValidationError('Mall Park is filled!')
+        return super().create(validated_data)
+
     class Meta:
         model = ParkingTicket
         fields = ('plate_number', 'entry_time', 'date_modified',
