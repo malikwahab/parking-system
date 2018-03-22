@@ -108,6 +108,8 @@ class ParkingTicket(models.Model):
         return self.get_ticket_fee()
 
     def amount_owed(self):
+        if self.tenant:
+            return 0.0
         return self.get_ticket_fee() - self.fee_paid
 
     def exit_park(self):

@@ -19,9 +19,16 @@ class ParkingTicketSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('This car is already parked!')
         if not mall.has_space():
             raise serializers.ValidationError('Mall Park is filled!')
-        if tenant not in mall.tenants.all():
+        if tenant and tenant not in mall.tenants.all():
             raise serializers.ValidationError('Selected tenant not in mall')
         return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        mall = validated_data['mall']
+        tenant = validated_data['tenant']
+        if tenant and tenant not in mall.tenants.all():
+            raise serializers.ValidationError('Selected tenant not in mall')
+        return super().update(instance, validated_data)
 
     class Meta:
         model = ParkingTicket
