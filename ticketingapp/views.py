@@ -6,8 +6,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import filters
 
-from ticketingapp.models import ParkingTicket, Mall
-from ticketingapp.serializers import ParkingTicketSerializer, MallSerializer
+from ticketingapp.models import ParkingTicket, Mall, Tenant
+from ticketingapp.serializers import ParkingTicketSerializer, MallSerializer, TenantSerializer
 
 # Create your views here.
 
@@ -33,6 +33,11 @@ class MallParkingTicketViewSet(ParkingTicketViewSet):
         return ParkingTicket.objects.filter(mall=self.kwargs['mall_pk'])
 
 
+class TenantViewset(ModelViewSet):
+    serializer_class = TenantSerializer
+    queryset = Tenant.objects.all()
+
+
 @api_view(['POST'])
 def pay_ticket(request, ticket_id):
     parkingticket = get_object_or_404(ParkingTicket, pk=ticket_id)
@@ -46,7 +51,7 @@ def pay_ticket(request, ticket_id):
 def exit_park(request, ticket_id):
     parkingticket = get_object_or_404(ParkingTicket, pk=ticket_id)
     if parkingticket.exit_park():
-        serializer = ParkingTicketSerializer(parkingticket)
+        serializer = ParkingTicketSerializer(parkingticket, context={'request': request})
         return Response(serializer.data)
     return Response({'message': 'Outstanding payment, can\'t exit park'},
                     status=status.HTTP_400_BAD_REQUEST)
