@@ -38,4 +38,4 @@ class MallSerializer(serializers.ModelSerializer):
     class Meta:
         model = Mall
         fields = ('name', 'maximum_no_cars', 'date_created', 'date_modified',
-                  'parkingtickets_url',)
+                  'parkingtickets_url', 'number_of_parked_cars',)
