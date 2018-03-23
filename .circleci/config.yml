@@ -60,6 +60,7 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
+      - run: bash .circleci/setup-heroku.sh
       - run:
           name: Deploy Master to Heroku
           command: |  # this command is framework-dependent and may vary
