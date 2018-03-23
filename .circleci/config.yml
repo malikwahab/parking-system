@@ -56,8 +56,8 @@ jobs:
       
   deploy:
     docker:
-      - image: my-image
-    working_directory: /tmp/my-project
+      - image: circleci/python:3.6.1
+    working_directory: ~/repo
     steps:
       - checkout
       - run:
