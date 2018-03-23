@@ -46,7 +46,7 @@ class MallParkingTicketViewSet(ParkingTicketViewSet):
         return ParkingTicket.objects.filter(mall=self.kwargs['mall_pk'])
 
 
-class TenantViewset(ModelViewSet):
+class TenantViewset(ModelViewSet, PartialPutMixin):
     serializer_class = TenantSerializer
     queryset = Tenant.objects.all()
 
@@ -59,8 +59,10 @@ def pay_ticket(request, ticket_id):
     """
     parkingticket = get_object_or_404(ParkingTicket, pk=ticket_id)
     parkingticket.checkout()  # TODO: refactore checkout logic
-    parkingticket.pay_ticket(request.data['fee_paid'])
-    serializer = ParkingTicketSerializer(parkingticket)
+    fee_paid = float(request.data['fee_paid'])
+    parkingticket.pay_ticket(fee_paid)
+    serializer = ParkingTicketSerializer(
+        parkingticket, context={'request': request})
     return Response(serializer.data)
 
 

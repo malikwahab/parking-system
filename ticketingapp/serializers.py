@@ -24,7 +24,7 @@ class ParkingTicketSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
-        mall = validated_data['mall']
+        mall = validated_data.get('mall')
         tenant = validated_data.get('tenant')
         if tenant and tenant not in mall.tenants.all():
             raise serializers.ValidationError('Selected tenant not in mall')
