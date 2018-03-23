@@ -32,6 +32,11 @@ $ venv\Scripts\activate
 python manage.py migrate
 ```
 
+## Start Server
+```
+python manage.py runserver
+```
+
 ## Testing
 To run the tests for the app, and see the coverage, run
 ```
