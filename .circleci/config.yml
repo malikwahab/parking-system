@@ -53,9 +53,30 @@ jobs:
       - store_artifacts:
           path: test-reports
           destination: test-reports
+      
+  deploy:
+    docker:
+      - image: parking-system
+    working_directory: /tmp/parking-system
+    steps:
+      - checkout
+      - run:
+          name: Deploy Master to Heroku
+          command: |  # this command is framework-dependent and may vary
+            heroku git:remote -a HEROKU_APP_NAME
+            git push --force https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME.git HEAD:refs/heads/master
+            sleep 5  # sleep for 5 seconds to wait for dynos
+            heroku restart
 
-deployment:
-  staging:
-    branch: master
-    heroku:
-      appname: parking-system-api
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - build
+      - deploy:  # only deploy when master successfully builds
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+  
