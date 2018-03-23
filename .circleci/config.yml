@@ -56,8 +56,8 @@ jobs:
       
   deploy:
     docker:
-      - image: parking-system
-    working_directory: /tmp/parking-system
+      - image: my-image
+    working_directory: /tmp/my-project
     steps:
       - checkout
       - run:
