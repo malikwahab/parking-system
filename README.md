@@ -15,21 +15,20 @@ After cloning, create a virtual environment and install the requirements. For Li
 
  ```sh
 $ cd parking-system
-$ virtualenv venv
+$ virtualenv -p python3.6 venv
 $ source venv/bin/activate
 $ pip install -r requirements.txt
  ```
  If you are on Windows, then use the following commands instead:
 
  ```sh
-$ virtualenv venv
+$ virtualenv -p python3 venv
 $ venv\Scripts\activate
 (venv) $ pip install -r requirements.txt
 ```
 
 ## Perform migrations
 ```
-python manage.py makemigrations
 python manage.py migrate
 ```
 
