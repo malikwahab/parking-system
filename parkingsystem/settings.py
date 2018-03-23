@@ -37,6 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Installed apps
+    'rest_framework',
+    'django_filters',
+    'rest_framework_swagger',
+    'ticketingapp.apps.TicketingappConfig'
 ]
 
 MIDDLEWARE = [
@@ -99,6 +105,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Rest framework settings
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 50
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
