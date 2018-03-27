@@ -8,7 +8,12 @@ from rest_framework import filters
 from rest_framework import mixins
 
 from ticketingapp.models import ParkingTicket, Mall, Tenant
-from ticketingapp.serializers import ParkingTicketSerializer, MallSerializer, TenantSerializer
+from ticketingapp.serializers import (
+    ParkingTicketSerializer,
+    MallSerializer,
+    TenantSerializer,
+    MallParkingTicketSerializer
+)
 
 # Create your views here.
 
@@ -41,6 +46,11 @@ class ParkingTicketViewSet(ModelViewSet, PartialPutMixin):
 
 
 class MallParkingTicketViewSet(ParkingTicketViewSet):
+    serializer_class = MallParkingTicketSerializer
+
+    def perform_create(self, serializer):
+        mall = Mall.objects.get(id=self.kwargs['mall_pk'])
+        serializer.save(mall=mall)
 
     def get_queryset(self):
         return ParkingTicket.objects.filter(mall=self.kwargs['mall_pk'])

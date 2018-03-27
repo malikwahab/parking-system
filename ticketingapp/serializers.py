@@ -57,3 +57,13 @@ class TenantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tenant
         fields = '__all__'
+
+
+class MallParkingTicketSerializer(ParkingTicketSerializer):
+    class Meta:
+        model = ParkingTicket
+        fields = ('id', 'plate_number', 'entry_time', 'date_modified',
+                  'exit_time', 'fee_paid', 'status', 'mall', 'ticket_fee',
+                  'url', 'tenant',)
+        read_only_fields = ('exit_time', 'fee_paid', 'status','mall',)
+        extra_kwargs = {'mall': {'allow_empty': True, 'required': False}}
