@@ -209,11 +209,24 @@ class TenantTent(APITestCase):
 
     def test_tenant_create(self):
         url = reverse('tenant-list')
-        mall_url = reverse('mall-detail', kwargs={'pk': self.mall.id})
         data = {
             'name': 'Adidas',
-            'malls': [mall_url],
+            'malls': [self.mall.id],
         }
+        response = self.client.post(url, data=data)
+
+        # assert successly created
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # assert response data contains name
+        self.assertEqual(response.data['name'], data['name'])
+    
+    def test_allow_null_mall(self):
+        url = reverse('tenant-list')
+        data = {
+            'name': 'Adidas'
+        }
+
         response = self.client.post(url, data=data)
 
         # assert successly created
