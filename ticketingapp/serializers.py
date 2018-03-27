@@ -32,7 +32,7 @@ class ParkingTicketSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ParkingTicket
-        fields = ('plate_number', 'entry_time', 'date_modified',
+        fields = ('id', 'plate_number', 'entry_time', 'date_modified',
                   'exit_time', 'fee_paid', 'status', 'mall', 'ticket_fee',
                   'url', 'tenant',)
         read_only_fields = ('exit_time', 'fee_paid', 'status',)
@@ -47,7 +47,7 @@ class MallSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Mall
-        fields = ('name', 'maximum_no_cars', 'date_created', 'date_modified',
+        fields = ('id', 'name', 'maximum_no_cars', 'date_created', 'date_modified',
                   'parkingtickets_url', 'number_of_parked_cars', 'tenants',)
         extra_kwargs = {'tenants': {'allow_empty': True, 'required': False}}
 
