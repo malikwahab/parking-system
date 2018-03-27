@@ -38,7 +38,7 @@ class ParkingTicketSerializer(serializers.ModelSerializer):
         read_only_fields = ('exit_time', 'fee_paid', 'status',)
 
 
-class MallSerializer(serializers.HyperlinkedModelSerializer):
+class MallSerializer(serializers.ModelSerializer):
     parkingtickets_url = serializers.HyperlinkedIdentityField(
         view_name='mall-parkingtickets-list',
         lookup_field='pk',
@@ -49,9 +49,10 @@ class MallSerializer(serializers.HyperlinkedModelSerializer):
         model = Mall
         fields = ('name', 'maximum_no_cars', 'date_created', 'date_modified',
                   'parkingtickets_url', 'number_of_parked_cars', 'tenants',)
+        extra_kwargs = {'tenants': {'allow_empty': True, 'required': False}}
 
 
-class TenantSerializer(serializers.HyperlinkedModelSerializer):
+class TenantSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tenant

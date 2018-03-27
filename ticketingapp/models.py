@@ -13,7 +13,7 @@ STATUS = [('parked', 'parked'), ('exited', 'exited')]
 
 
 class Mall(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     maximum_no_cars = models.IntegerField(default=10)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
@@ -60,8 +60,9 @@ class Mall(models.Model):
 
 
 class Tenant(models.Model):
-    name = models.CharField(max_length=100)
-    malls = models.ManyToManyField(Mall, related_name='tenants')
+    name = models.CharField(max_length=100, unique=True)
+    malls = models.ManyToManyField(
+        Mall, related_name='tenants', blank=True)
 
     def __str__(self):
         return self.name
