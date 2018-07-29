@@ -1,6 +1,6 @@
 ## Parking System
 
-Parking System API to manage car parking in mall. Handles fee calculation and provides endpoint make payment.
+Parking System API to manage car parking in malls. Handles fee calculation and provides endpoint to make payment.
 
 ## Installation
 Clone the repo

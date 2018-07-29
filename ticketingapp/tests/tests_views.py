@@ -179,7 +179,7 @@ class ParkingTicketTest(APITestCase):
         self.assertEqual(second_response.status_code, status.HTTP_200_OK)
 
 
-class TenantTent(APITestCase):
+class TenantTest(APITestCase):
 
     def setUp(self):
         self.mall = Mall.objects.create(name='Marryland')
