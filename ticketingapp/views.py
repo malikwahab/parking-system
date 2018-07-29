@@ -1,20 +1,26 @@
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.models import User
+
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.viewsets import ModelViewSet
+
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status
-from rest_framework import filters
-from rest_framework import mixins
+from rest_framework import status, filters, mixins, permissions
+
+from rest_framework_jwt.settings import api_settings as jwt_settings
 
 from ticketingapp.models import ParkingTicket, Mall, Tenant
 from ticketingapp.serializers import (
     ParkingTicketSerializer,
     MallSerializer,
+    AdminMallSerializer,
     TenantSerializer,
-    MallParkingTicketSerializer
+    MallParkingTicketSerializer,
+    UserSerializer
 )
-
+from ticketingapp.filters import IsMallAdminFilterBackend
+from ticketingapp.permissions import IsMallAdmin
 # Create your views here.
 
 
@@ -25,12 +31,24 @@ class PartialPutMixin(mixins.UpdateModelMixin):
         return super().update(request, *args, **kwargs)
 
 
-class MallViewSet(ModelViewSet, PartialPutMixin):
+class MallViewSet(mixins.RetrieveModelMixin,
+                   PartialPutMixin,
+                   mixins.DestroyModelMixin,
+                   mixins.ListModelMixin,
+                   GenericViewSet):
     """
     This endpoint presents the malls in the System
     """
     serializer_class = MallSerializer
     queryset = Mall.objects.all()
+    permission_classes = (IsMallAdmin,)
+    filter_backends = (IsMallAdminFilterBackend, )
+
+
+class AdminMallViewSet(ModelViewSet, PartialPutMixin):
+    queryset = Mall.objects.all()
+    serializer_class = AdminMallSerializer
+    permission_classes = (permissions.IsAdminUser,)
 
 
 class ParkingTicketViewSet(ModelViewSet, PartialPutMixin):
@@ -59,6 +77,33 @@ class MallParkingTicketViewSet(ParkingTicketViewSet):
 class TenantViewset(ModelViewSet, PartialPutMixin):
     serializer_class = TenantSerializer
     queryset = Tenant.objects.all()
+
+
+class UserViewSet(mixins.CreateModelMixin, GenericViewSet):
+    """The API class for creating User."""
+
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (permissions.IsAdminUser,)
+
+    def create(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        
+        # Generate api token
+        jwt_payload_handler = jwt_settings.JWT_PAYLOAD_HANDLER
+        jwt_encode_handler = jwt_settings.JWT_ENCODE_HANDLER
+        payload = jwt_payload_handler(user)
+        token = jwt_encode_handler(payload)
+        return Response({'token': token, 'user': serializer.data},
+                        status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        """To return the created user. """
+        return serializer.save()
+
 
 
 @api_view(['POST'])

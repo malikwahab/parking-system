@@ -1,3 +1,5 @@
+from django.contrib.auth.models import User
+
 from rest_framework import serializers
 from rest_framework.settings import api_settings
 
@@ -48,7 +50,22 @@ class MallSerializer(serializers.ModelSerializer):
     class Meta:
         model = Mall
         fields = ('id', 'name', 'maximum_no_cars', 'date_created', 'date_modified',
-                  'parkingtickets_url', 'number_of_parked_cars', 'tenants',)
+                  'parkingtickets_url', 'number_of_parked_cars', 'tenants', 'admin',)
+        read_only_fields = ('admin',)
+        extra_kwargs = {'tenants': {'allow_empty': True, 'required': False}}
+
+
+class AdminMallSerializer(serializers.ModelSerializer):
+    parkingtickets_url = serializers.HyperlinkedIdentityField(
+        view_name='mall-parkingtickets-list',
+        lookup_field='pk',
+        lookup_url_kwarg='mall_pk'
+    )
+
+    class Meta:
+        model = Mall
+        fields = ('id', 'name', 'maximum_no_cars', 'date_created', 'date_modified',
+                  'parkingtickets_url', 'number_of_parked_cars', 'tenants', 'admin',)
         extra_kwargs = {'tenants': {'allow_empty': True, 'required': False}}
 
 
@@ -64,6 +81,21 @@ class MallParkingTicketSerializer(ParkingTicketSerializer):
         model = ParkingTicket
         fields = ('id', 'plate_number', 'entry_time', 'date_modified',
                   'exit_time', 'fee_paid', 'status', 'mall', 'ticket_fee',
-                  'url', 'tenant',)
+                  'url', 'tenant')
         read_only_fields = ('exit_time', 'fee_paid', 'status','mall',)
         extra_kwargs = {'mall': {'allow_empty': True, 'required': False}}
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    password = serializers.CharField(write_only=True, style={'input_type': 'password'})
+
+    def create(self, validated_data):
+        user = User.objects.create(username=validated_data['username'])
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
+
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'password',)
