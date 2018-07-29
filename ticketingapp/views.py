@@ -16,11 +16,10 @@ from ticketingapp.serializers import (
     MallSerializer,
     AdminMallSerializer,
     TenantSerializer,
-    MallParkingTicketSerializer,
     UserSerializer
 )
 from ticketingapp.filters import IsMallAdminFilterBackend
-from ticketingapp.permissions import IsMallAdmin
+from ticketingapp.permissions import IsMallAdmin, IsAdmin
 # Create your views here.
 
 
@@ -41,7 +40,7 @@ class MallViewSet(mixins.RetrieveModelMixin,
     """
     serializer_class = MallSerializer
     queryset = Mall.objects.all()
-    permission_classes = (IsMallAdmin,)
+    permission_classes = (IsAdmin,)
     filter_backends = (IsMallAdminFilterBackend, )
 
 
@@ -52,19 +51,12 @@ class AdminMallViewSet(ModelViewSet, PartialPutMixin):
 
 
 class ParkingTicketViewSet(ModelViewSet, PartialPutMixin):
-    """
-    This endpoint presents the parking tickets,
-    Contains all endpoint for managing tickets
-    """
     serializer_class = ParkingTicketSerializer
     queryset = ParkingTicket.objects.all()
     filter_backends = (DjangoFilterBackend, filters.SearchFilter,)
+    permission_classes = (IsMallAdmin,)
     filter_fields = ('status',)
     search_fields = ('plate_number',)
-
-
-class MallParkingTicketViewSet(ParkingTicketViewSet):
-    serializer_class = MallParkingTicketSerializer
 
     def perform_create(self, serializer):
         mall = Mall.objects.get(id=self.kwargs['mall_pk'])

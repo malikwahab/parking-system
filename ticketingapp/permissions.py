@@ -1,14 +1,14 @@
 from rest_framework import permissions
 from ticketingapp.models import Mall
 
-class IsMallAdmin(permissions.BasePermission):
+class IsAdmin(permissions.BasePermission):
     """Ensure all allowed access is of the object owner."""
 
     def has_object_permission(self, request, views, obj):
         return obj.admin == request.user
 
 
-class IsMallOwner(IsMallAdmin):
+class IsMallAdmin(IsAdmin):
     """Filters that allow only mall owner to see parkedcars
     """
 

@@ -10,10 +10,6 @@ class ParkingTicketSerializer(serializers.ModelSerializer):
     # accumulated_ticket_fee
     ticket_fee = serializers.ReadOnlyField(source='amount_owed')
 
-    url = serializers.HyperlinkedIdentityField(
-        view_name='parkingticket-detail'
-    )
-
     def create(self, validated_data):
         mall = validated_data.get('mall')
         tenant = validated_data.get('tenant')
@@ -35,9 +31,9 @@ class ParkingTicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = ParkingTicket
         fields = ('id', 'plate_number', 'entry_time', 'date_modified',
-                  'exit_time', 'fee_paid', 'status', 'mall', 'ticket_fee',
-                  'url', 'tenant',)
-        read_only_fields = ('exit_time', 'fee_paid', 'status',)
+                  'exit_time', 'fee_paid', 'status', 'mall', 'ticket_fee', 'tenant',)
+        read_only_fields = ('exit_time', 'fee_paid', 'status', 'mall',)
+        extra_kwargs = {'mall': {'allow_empty': True, 'required': False}}
 
 
 class MallSerializer(serializers.ModelSerializer):
@@ -74,16 +70,6 @@ class TenantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tenant
         fields = '__all__'
-
-
-class MallParkingTicketSerializer(ParkingTicketSerializer):
-    class Meta:
-        model = ParkingTicket
-        fields = ('id', 'plate_number', 'entry_time', 'date_modified',
-                  'exit_time', 'fee_paid', 'status', 'mall', 'ticket_fee',
-                  'url', 'tenant')
-        read_only_fields = ('exit_time', 'fee_paid', 'status','mall',)
-        extra_kwargs = {'mall': {'allow_empty': True, 'required': False}}
 
 
 class UserSerializer(serializers.ModelSerializer):

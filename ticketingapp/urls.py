@@ -5,7 +5,6 @@ from rest_framework_nested.routers import NestedSimpleRouter
 from ticketingapp.views import (MallViewSet,
                                 AdminMallViewSet,
                                 ParkingTicketViewSet,
-                                MallParkingTicketViewSet,
                                 TenantViewset,
                                 UserViewSet,
                                 pay_ticket,
@@ -14,11 +13,11 @@ from ticketingapp.views import (MallViewSet,
 
 router = routers.DefaultRouter()
 router.register('mall', MallViewSet)
-router.register('admin-mall', AdminMallViewSet)
+router.register('admin-mall', AdminMallViewSet, base_name="admin-mall")
 router.register('users', UserViewSet)
 
 mall_router = NestedSimpleRouter(router, 'mall', lookup='mall')
-mall_router.register('parkingtickets', MallParkingTicketViewSet, base_name='mall-parkingtickets')
+mall_router.register('parkingtickets', ParkingTicketViewSet, base_name='mall-parkingtickets')
 mall_router.register('tenants', TenantViewset, base_name='mall-tenants')
 
 urlpatterns = [
