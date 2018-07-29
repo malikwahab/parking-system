@@ -68,7 +68,7 @@ def pay_ticket(request, ticket_id):
     You can also make partial payment
     """
     parkingticket = get_object_or_404(ParkingTicket, pk=ticket_id)
-    parkingticket.checkout()  # TODO: refactore checkout logic
+    parkingticket.checkout()  # TODO: refactor checkout logic
     fee_paid = float(request.data['fee_paid'])
     parkingticket.pay_ticket(fee_paid)
     serializer = ParkingTicketSerializer(
@@ -79,7 +79,7 @@ def pay_ticket(request, ticket_id):
 @api_view(['GET'])
 def exit_park(request, ticket_id):
     """
-    This endpoint is to make exit the park. Throws error if there
+    This endpoint is to exit the park. Throws error if there
     is outstanding payment on the ticket
     """
     parkingticket = get_object_or_404(ParkingTicket, pk=ticket_id)
