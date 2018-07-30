@@ -116,7 +116,7 @@ GET /mall/{mall_pk}/parkingtickets/
 #### Create a parking ticket
 
 ```
-POST /parkingtickets/
+POST /mall/{mall_pk}/parkingtickets/
 
 {
   "plate_number": "string",
@@ -126,22 +126,16 @@ POST /parkingtickets/
 
 ```
 
-#### Get all parking tickets in all malls
-
-```
-GET /parkingtickets
-```
-
 #### Get a parking ticket
 
 ```
-GET /parkingtickets/{id}/
+GET /mall/{mall_pk}/parkingtickets/{id}/
 ```
 
 #### Edit a parking ticket
 
 ```
-PUT /parkingtickets/{id}/
+PUT /mall/{mall_pk}/parkingtickets/{id}/
 
 {
   "plate_number": "string",
@@ -154,13 +148,13 @@ PUT /parkingtickets/{id}/
 #### Delete a parking ticket
 
 ```
-DELETE /parkingtickets/{id}/
+DELETE /mall/{mall_pk}/parkingtickets/{id}/
 ```
 
 #### Make payment for a parking ticket
 
 ```
-POST /parkingtickets/{ticket_id}/pay-ticket
+POST /pay-ticket/{ticket_id}/
 {
     "fee_paid": 0
 }
@@ -170,12 +164,12 @@ POST /parkingtickets/{ticket_id}/pay-ticket
 Successful if all payment has been made, fail otherwise
 
 ```
-GET /parkingtickets/{ticket_id}/exit
+GET /exit/{ticket_id}/
 ```
 
 #### Create a tenant
 ```
-POST /tenants/
+POST /mall/{mall_pk}/tenants/
 
 {
   "name": "string",
@@ -188,20 +182,20 @@ POST /tenants/
 
 #### Get all tenants
 ```
-GET /tenants/
+GET /mall/{mall_pk}/tenants/
 ```
 
 #### Get a tenant
 ```
-GET /tenants/{id}
+GET /mall/{mall_pk}/tenants/{id}
 ```
 
 #### Edit a tenant
 ```
-PUT /tenants/{id}/
+PUT /mall/{mall_pk}/tenants/{id}/
 ```
 
 #### Delete a tenant
 ```
-DELETE /tenants/{id}/
+DELETE /mall/{mall_pk}/tenants/{id}/
 ```
