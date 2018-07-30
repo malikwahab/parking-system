@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 
 from django.utils import timezone
+from django.contrib.auth.models import User
+
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient, APITestCase
@@ -13,12 +15,18 @@ from ticketingapp.models import Mall, ParkingTicket, Tenant
 class MallViewSet(APITestCase):
 
     def setUp(self):
-        self.client = APIClient()
-        self.mall = Mall.objects.create(name='Marryland')
+        self.user = User.objects.create(username='testuser', is_staff=True)
+        self.client.force_authenticate(user=self.user)
+        self.mall = Mall.objects.create(name='Marryland', admin=self.user)
+    
+    def tearDown(self):
+        self.client.logout()
+        User.objects.all().delete()
+        Mall.objects.all().delete()
 
     def test_can_create_mall(self):
-        url = reverse('mall-list')
-        response = self.client.post(url, data={'name': 'ICM'})
+        url = reverse('admin-mall-list')
+        response = self.client.post(url, data={'name': 'ICM', 'admin': self.user.id})
 
         # assert status code for created
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -27,20 +35,20 @@ class MallViewSet(APITestCase):
         self.assertEqual(response.data['name'], 'ICM')
 
     def test_can_get_mall(self):
-        url = reverse('mall-detail', kwargs={'pk': self.mall.id})
+        url = reverse('admin-mall-detail', kwargs={'pk': self.mall.id})
         response = self.client.get(url)
 
         # test mall returned
         self.assertEqual(response.data['name'], self.mall.name)
 
     def test_can_edit_mall(self):
-        url = reverse('mall-detail', kwargs={'pk': self.mall.id})
+        url = reverse('admin-mall-detail', kwargs={'pk': self.mall.id})
         response = self.client.put(url, kwargs={'name': 'Ikeja City Mall'})
 
         self.assertEqual(response.data['name'], self.mall.name)
 
     def test_can_delete(self):
-        url = reverse('mall-detail', kwargs={'pk': self.mall.id})
+        url = reverse('admin-mall-detail', kwargs={'pk': self.mall.id})
         mall_id = self.mall.id
 
         response = self.client.delete(url)
@@ -92,15 +100,21 @@ class MallViewSet(APITestCase):
 class ParkingTicketTest(APITestCase):
 
     def setUp(self):
-        self.client = APIClient()
-        self.mall = Mall.objects.create(name='ICM')
+        user = User.objects.create(username='testuser')
+        self.client.force_authenticate(user=user)
+        self.mall = Mall.objects.create(name='ICM', admin=user)
         self.parkingticket = ParkingTicket.objects.create(
             plate_number="ZYX-984SD",
             mall=self.mall
         )
 
+        def tearDown(self):
+            self.client.logout()
+            User.objects.all().delete()
+            ParkingTicket.objects.all().delete()
+
     def test_parking_ticket_create(self):
-        url = reverse('parkingticket-list')
+        url = reverse('mall-parkingtickets-list', kwargs={'mall_pk': self.mall.id})
         data = {
             'plate_number': 'ABC-123DE',
             'mall': self.mall.id
@@ -114,7 +128,7 @@ class ParkingTicketTest(APITestCase):
         self.assertEqual(response.data['plate_number'], data['plate_number'])
 
     def test_plate_number_validation(self):
-        url = reverse('parkingticket-list')
+        url = reverse('mall-parkingtickets-list', kwargs={'mall_pk': self.mall.id})
         data = {
             'plate_number': 'invalid-platenumber1223',
             'mall': self.mall.id
@@ -130,8 +144,8 @@ class ParkingTicketTest(APITestCase):
                       str(response.content))  # cast byte object to string
 
     def test_can_edit(self):
-        url = reverse('parkingticket-detail',
-                      kwargs={'pk': self.parkingticket.id})
+        url = reverse('mall-parkingtickets-detail',
+                      kwargs={'pk': self.parkingticket.id, 'mall_pk': self.mall.id})
         new_plate_number = 'ZXY-111DF'
         response = self.client.put(
             url, data={'plate_number': new_plate_number})
@@ -143,8 +157,8 @@ class ParkingTicketTest(APITestCase):
         self.assertEqual(response.data['plate_number'], new_plate_number)
 
     def test_delete_edit(self):
-        url = reverse('parkingticket-detail',
-                      kwargs={'pk': self.parkingticket.id})
+        url = reverse('mall-parkingtickets-detail',
+                      kwargs={'pk': self.parkingticket.id, 'mall_pk': self.mall.id})
 
         response = self.client.delete(url)
 
@@ -182,7 +196,9 @@ class ParkingTicketTest(APITestCase):
 class TenantTest(APITestCase):
 
     def setUp(self):
-        self.mall = Mall.objects.create(name='Marryland')
+        user = User.objects.create(username='testuser')
+        self.client.force_authenticate(user=user)
+        self.mall = Mall.objects.create(name='Marryland', admin=user)
         self.tenant = Tenant.objects.create(
             name='KFC'
         )
@@ -192,6 +208,13 @@ class TenantTest(APITestCase):
             mall=self.mall,
             tenant=self.tenant
         )
+    
+    def tearDown(self):
+        self.client.logout()
+        User.objects.all().delete()
+        Mall.objects.all().delete()
+        ParkingTicket.objects.all().delete()
+        Tenant.objects.all().delete()
 
     def test_tenant_fee_parking(self):
         self.parkingticket.entry_time = \
@@ -200,15 +223,15 @@ class TenantTest(APITestCase):
 
         self.parkingticket.save()
 
-        url = reverse('parkingticket-detail',
-                      kwargs={'pk': self.parkingticket.id})
+        url = reverse('mall-parkingtickets-detail',
+                      kwargs={'pk': self.parkingticket.id, 'mall_pk': self.mall.id})
         response = self.client.get(url)
 
         # assert no amount owned
         self.assertEqual(response.data['ticket_fee'], 0)
 
     def test_tenant_create(self):
-        url = reverse('tenant-list')
+        url = reverse('mall-tenants-list', kwargs={'mall_pk': self.mall.id})
         data = {
             'name': 'Adidas',
             'malls': [self.mall.id],
@@ -222,7 +245,7 @@ class TenantTest(APITestCase):
         self.assertEqual(response.data['name'], data['name'])
     
     def test_allow_null_mall(self):
-        url = reverse('tenant-list')
+        url = reverse('mall-tenants-list', kwargs={'mall_pk': self.mall.id})
         data = {
             'name': 'Adidas'
         }
@@ -236,7 +259,7 @@ class TenantTest(APITestCase):
         self.assertEqual(response.data['name'], data['name'])
 
     def test_can_edit(self):
-        url = reverse('tenant-detail', kwargs={'pk': self.tenant.id})
+        url = reverse('mall-tenants-detail', kwargs={'pk': self.tenant.id, 'mall_pk': self.mall.id})
         new_name = 'Fifa'
         response = self.client.put(url, data={'name': new_name})
 
@@ -247,7 +270,7 @@ class TenantTest(APITestCase):
         self.assertEqual(response.data['name'], new_name)
 
     def test_can_delete(self):
-        url = reverse('tenant-detail', kwargs={'pk': self.tenant.id})
+        url = reverse('mall-tenants-detail', kwargs={'pk': self.tenant.id, 'mall_pk': self.mall.id})
 
         response = self.client.delete(url)
 

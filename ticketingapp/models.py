@@ -17,6 +17,8 @@ class Mall(models.Model):
     maximum_no_cars = models.IntegerField(default=10)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
+    admin = models.ForeignKey('auth.User', related_name='malls',
+                              on_delete=models.CASCADE, null=True)
 
     def number_of_parked_cars(self):
         return self.parkingtickets.filter(status=STATUS[0][1]).count()

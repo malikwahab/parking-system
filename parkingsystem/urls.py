@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 from rest_framework_swagger.views import get_swagger_view
 
 schema_view = get_swagger_view(title='Parking System API')
@@ -22,5 +23,8 @@ schema_view = get_swagger_view(title='Parking System API')
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('ticketingapp.urls')),
-    path('schema', schema_view)
+    path('api-auth/', include('rest_framework.urls')),
+    path('login', obtain_jwt_token),
+    path('refresh-token', refresh_jwt_token),
+    path('schema', schema_view),
 ]

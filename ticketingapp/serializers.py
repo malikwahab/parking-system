@@ -1,3 +1,5 @@
+from django.contrib.auth.models import User
+
 from rest_framework import serializers
 from rest_framework.settings import api_settings
 
@@ -7,10 +9,6 @@ from ticketingapp.models import ParkingTicket, Mall, Tenant
 class ParkingTicketSerializer(serializers.ModelSerializer):
     # accumulated_ticket_fee
     ticket_fee = serializers.ReadOnlyField(source='amount_owed')
-
-    url = serializers.HyperlinkedIdentityField(
-        view_name='parkingticket-detail'
-    )
 
     def create(self, validated_data):
         mall = validated_data.get('mall')
@@ -33,9 +31,9 @@ class ParkingTicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = ParkingTicket
         fields = ('id', 'plate_number', 'entry_time', 'date_modified',
-                  'exit_time', 'fee_paid', 'status', 'mall', 'ticket_fee',
-                  'url', 'tenant',)
-        read_only_fields = ('exit_time', 'fee_paid', 'status',)
+                  'exit_time', 'fee_paid', 'status', 'mall', 'ticket_fee', 'tenant',)
+        read_only_fields = ('exit_time', 'fee_paid', 'status', 'mall',)
+        extra_kwargs = {'mall': {'allow_empty': True, 'required': False}}
 
 
 class MallSerializer(serializers.ModelSerializer):
@@ -48,7 +46,22 @@ class MallSerializer(serializers.ModelSerializer):
     class Meta:
         model = Mall
         fields = ('id', 'name', 'maximum_no_cars', 'date_created', 'date_modified',
-                  'parkingtickets_url', 'number_of_parked_cars', 'tenants',)
+                  'parkingtickets_url', 'number_of_parked_cars', 'tenants', 'admin',)
+        read_only_fields = ('admin',)
+        extra_kwargs = {'tenants': {'allow_empty': True, 'required': False}}
+
+
+class AdminMallSerializer(serializers.ModelSerializer):
+    parkingtickets_url = serializers.HyperlinkedIdentityField(
+        view_name='mall-parkingtickets-list',
+        lookup_field='pk',
+        lookup_url_kwarg='mall_pk'
+    )
+
+    class Meta:
+        model = Mall
+        fields = ('id', 'name', 'maximum_no_cars', 'date_created', 'date_modified',
+                  'parkingtickets_url', 'number_of_parked_cars', 'tenants', 'admin',)
         extra_kwargs = {'tenants': {'allow_empty': True, 'required': False}}
 
 
@@ -59,11 +72,16 @@ class TenantSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class MallParkingTicketSerializer(ParkingTicketSerializer):
+class UserSerializer(serializers.ModelSerializer):
+
+    password = serializers.CharField(write_only=True, style={'input_type': 'password'})
+
+    def create(self, validated_data):
+        user = User.objects.create(username=validated_data['username'])
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
+
     class Meta:
-        model = ParkingTicket
-        fields = ('id', 'plate_number', 'entry_time', 'date_modified',
-                  'exit_time', 'fee_paid', 'status', 'mall', 'ticket_fee',
-                  'url', 'tenant',)
-        read_only_fields = ('exit_time', 'fee_paid', 'status','mall',)
-        extra_kwargs = {'mall': {'allow_empty': True, 'required': False}}
+        model = User
+        fields = ('id', 'username', 'password',)

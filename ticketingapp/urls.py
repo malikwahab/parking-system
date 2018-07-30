@@ -3,27 +3,29 @@ from rest_framework import routers
 from rest_framework_nested.routers import NestedSimpleRouter
 
 from ticketingapp.views import (MallViewSet,
+                                AdminMallViewSet,
                                 ParkingTicketViewSet,
-                                MallParkingTicketViewSet,
                                 TenantViewset,
+                                UserViewSet,
                                 pay_ticket,
                                 exit_park,
                                 payment_details)
 
 router = routers.DefaultRouter()
 router.register('mall', MallViewSet)
-router.register('parkingtickets', ParkingTicketViewSet)
-router.register('tenants', TenantViewset)
+router.register('admin-mall', AdminMallViewSet, base_name="admin-mall")
+router.register('users', UserViewSet)
 
 mall_router = NestedSimpleRouter(router, 'mall', lookup='mall')
-mall_router.register('parkingtickets', MallParkingTicketViewSet, base_name='mall-parkingtickets')
+mall_router.register('parkingtickets', ParkingTicketViewSet, base_name='mall-parkingtickets')
+mall_router.register('tenants', TenantViewset, base_name='mall-tenants')
 
 urlpatterns = [
-    path('parkingtickets/<int:ticket_id>/pay-ticket',
+    path('pay-ticket/<int:ticket_id>',
          pay_ticket, name="payment-route"),
-    path('parkingtickets/<int:ticket_id>/exit', exit_park, name='exit-route'),
+    path('exit/<int:ticket_id>', exit_park, name='exit-route'),
     path('mall/<int:mall_id>/payment-details',
-         payment_details, name='payment-details-route')
+         payment_details, name='payment-details-route'),
 ]
 
 urlpatterns += [*router.urls, *mall_router.urls]
