@@ -23,11 +23,11 @@ psycopg2==2.7.4
 PyJWT==1.6.4
 pylint==2.0.1
 pytz==2018.3
-requests==2.18.4
+requests==2.21.0
 simplejson==3.13.2
 six==1.11.0
 typed-ast==1.1.0
 uritemplate==3.0.0
-urllib3==1.22
+urllib3==1.24.1
 whitenoise==3.3.1
 wrapt==1.10.11
