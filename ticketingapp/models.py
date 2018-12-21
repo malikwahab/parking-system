@@ -63,8 +63,8 @@ class Mall(models.Model):
 
 class Tenant(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    malls = models.ManyToManyField(
-        Mall, related_name='tenants', blank=True)
+    malls = models.ForeignKey(Mall, related_name="tenants",
+                              on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.name
