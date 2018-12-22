@@ -39,7 +39,7 @@ class MallViewSet(mixins.RetrieveModelMixin,
     """
     serializer_class = MallSerializer
     queryset = Mall.objects.all()
-    permission_classes = (IsAdmin,)
+    permission_classes = (permissions.IsAuthenticated, IsAdmin,)
     filter_backends = (IsMallAdminFilterBackend, )
 
 
