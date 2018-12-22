@@ -14,7 +14,6 @@ from ticketingapp.models import ParkingTicket, Mall, Tenant
 from ticketingapp.serializers import (
     ParkingTicketSerializer,
     MallSerializer,
-    AdminMallSerializer,
     TenantSerializer,
     UserSerializer
 )
@@ -42,12 +41,6 @@ class MallViewSet(mixins.RetrieveModelMixin,
     queryset = Mall.objects.all()
     permission_classes = (IsAdmin,)
     filter_backends = (IsMallAdminFilterBackend, )
-
-
-class AdminMallViewSet(ModelViewSet, PartialPutMixin):
-    queryset = Mall.objects.all()
-    serializer_class = AdminMallSerializer
-    permission_classes = (permissions.IsAdminUser,)
 
 
 class ParkingTicketViewSet(ModelViewSet, PartialPutMixin):

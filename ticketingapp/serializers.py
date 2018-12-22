@@ -51,20 +51,6 @@ class MallSerializer(serializers.ModelSerializer):
         extra_kwargs = {'tenants': {'allow_empty': True, 'required': False}}
 
 
-class AdminMallSerializer(serializers.ModelSerializer):
-    parkingtickets_url = serializers.HyperlinkedIdentityField(
-        view_name='mall-parkingtickets-list',
-        lookup_field='pk',
-        lookup_url_kwarg='mall_pk'
-    )
-
-    class Meta:
-        model = Mall
-        fields = ('id', 'name', 'maximum_no_cars', 'date_created', 'date_modified',
-                  'parkingtickets_url', 'number_of_parked_cars', 'tenants', 'admin',)
-        extra_kwargs = {'tenants': {'allow_empty': True, 'required': False}}
-
-
 class TenantSerializer(serializers.ModelSerializer):
 
     class Meta:
