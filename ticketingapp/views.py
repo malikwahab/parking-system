@@ -1,5 +1,4 @@
 from django.shortcuts import get_object_or_404
-from django.contrib.auth.models import User
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -8,14 +7,11 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status, filters, mixins, permissions
 
-from rest_framework_jwt.settings import api_settings as jwt_settings
-
 from ticketingapp.models import ParkingTicket, Mall, Tenant
 from ticketingapp.serializers import (
     ParkingTicketSerializer,
     MallSerializer,
-    TenantSerializer,
-    UserSerializer
+    TenantSerializer
 )
 from ticketingapp.filters import IsMallAdminFilterBackend
 from ticketingapp.permissions import IsMallAdmin, IsAdmin
@@ -62,33 +58,6 @@ class ParkingTicketViewSet(ModelViewSet, PartialPutMixin):
 class TenantViewset(ModelViewSet, PartialPutMixin):
     serializer_class = TenantSerializer
     queryset = Tenant.objects.all()
-
-
-class UserViewSet(mixins.CreateModelMixin, GenericViewSet):
-    """The API class for creating User."""
-
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = (permissions.IsAdminUser,)
-
-    def create(self, request):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        
-        # Generate api token
-        jwt_payload_handler = jwt_settings.JWT_PAYLOAD_HANDLER
-        jwt_encode_handler = jwt_settings.JWT_ENCODE_HANDLER
-        payload = jwt_payload_handler(user)
-        token = jwt_encode_handler(payload)
-        return Response({'token': token, 'user': serializer.data},
-                        status=status.HTTP_201_CREATED, headers=headers)
-
-    def perform_create(self, serializer):
-        """To return the created user. """
-        return serializer.save()
-
 
 
 @api_view(['POST'])

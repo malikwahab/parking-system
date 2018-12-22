@@ -6,14 +6,12 @@ from rest_framework_jwt.views import obtain_jwt_token
 from ticketingapp.views import (MallViewSet,
                                 ParkingTicketViewSet,
                                 TenantViewset,
-                                UserViewSet,
                                 pay_ticket,
                                 exit_park,
                                 payment_details)
 
 router = routers.DefaultRouter()
 router.register('mall', MallViewSet)
-router.register('users', UserViewSet)
 
 mall_router = NestedSimpleRouter(router, 'mall', lookup='mall')
 mall_router.register('parkingtickets', ParkingTicketViewSet, base_name='mall-parkingtickets')
@@ -30,4 +28,3 @@ urlpatterns = [
     *router.urls,
     *mall_router.urls
 ]
-

@@ -1,6 +1,7 @@
 from rest_framework import permissions
 from ticketingapp.models import Mall
 
+
 class IsAdmin(permissions.BasePermission):
     """Ensure all allowed access is of the object owner."""
 

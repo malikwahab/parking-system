@@ -77,6 +77,11 @@ class Tenant(models.Model):
         ]
 
 
+class TenantCars(models.Model):
+    plate_number = models.CharField(max_length=9, validators=[plate_number_validator])
+    tenant = models.ForeignKey(Tenant, related_name='cars', on_delete=models.CASCADE)
+
+
 class ParkingTicket(models.Model):
     plate_number = models.CharField(max_length=9,
                                     validators=[plate_number_validator])
