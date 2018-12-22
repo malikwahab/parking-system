@@ -19,14 +19,16 @@ class Mall(models.Model):
     date_modified = models.DateTimeField(auto_now=True)
     admin = models.ForeignKey('auth.User', related_name='malls',
                               on_delete=models.CASCADE, null=True)
+    charge_per_min = models.IntegerField(default=0, null=False, blank=False)
+    first_thirty_free = models.BooleanField(default=False, null=False, blank=False)
 
     def number_of_parked_cars(self):
         return self.parkingtickets.filter(status=STATUS[0][1]).count()
 
     def has_space(self):
-        '''Check if currently parked cars are not more than
+        """Check if currently parked cars are not more than
         maximum_no_cars
-        '''
+        """
         parked_cars = self.parkingtickets.filter(status=STATUS[0][1])
         return parked_cars.count() < (self.maximum_no_cars)
 
