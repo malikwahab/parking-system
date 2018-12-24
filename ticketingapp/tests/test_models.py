@@ -3,16 +3,17 @@ from datetime import datetime, timedelta
 from django.test import TestCase
 from django.utils import timezone
 
-from ticketingapp.models import ParkingTicket, Mall
+from ticketingapp.models import ParkingTicket, Park
 
+# TODO: Fix the test and write new test
 
 class TestParkingTicket(TestCase):
 
     def setUp(self):
-        mall = Mall.objects.create(name='ICM')
+        park = Park.objects.create(name='ICM')
         self.parkingticket = ParkingTicket.objects.create(
             plate_number="ABC-123ED",
-            mall=mall
+            park=park
         )
 
     def test_first_thirty_minutes(self):
@@ -110,34 +111,34 @@ class TestParkingTicket(TestCase):
 class TestMall(TestCase):
 
     def setUp(self):
-        self.mall = Mall.objects.create(
+        self.park = Park.objects.create(
             name='ICM', maximum_no_cars=2)
         self.parkingticket = ParkingTicket.objects.create(
             plate_number="ABC-123ED",
-            mall=self.mall
+            park=self.park
         )
 
     def test_has_space(self):
         # assert has space
-        self.assertTrue(self.mall.has_space())
+        self.assertTrue(self.park.has_space())
         
         ParkingTicket.objects.create(
             plate_number="ZYX-984SD",
-            mall=self.mall
+            park=self.park
         )
 
         # assert no space
-        self.assertFalse(self.mall.has_space())
+        self.assertFalse(self.park.has_space())
 
     def test_is_parked(self):
         # assert car is parked
-        self.assertTrue(self.mall.is_parked('ABC-123ED'))
+        self.assertTrue(self.park.is_parked('ABC-123ED'))
 
         # assert car is not parked
-        self.assertFalse(self.mall.is_parked('ZXC-456LK'))
+        self.assertFalse(self.park.is_parked('ZXC-456LK'))
     
     def test_amount_paid(self):
         self.parkingticket.pay_ticket(300)
 
         # assert amount paid
-        self.assertEqual(self.mall.get_amount_paid(), 300)
+        self.assertEqual(self.park.get_amount_paid(), 300)

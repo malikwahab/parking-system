@@ -1,5 +1,4 @@
 from django.shortcuts import get_object_or_404
-from django.contrib.auth.models import User
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -8,18 +7,13 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status, filters, mixins, permissions
 
-from rest_framework_jwt.settings import api_settings as jwt_settings
-
-from ticketingapp.models import ParkingTicket, Mall, Tenant
+from ticketingapp.models import ParkingTicket, Park, Tenant
 from ticketingapp.serializers import (
     ParkingTicketSerializer,
-    MallSerializer,
-    AdminMallSerializer,
-    TenantSerializer,
-    UserSerializer
+    ParkSerializer,
+    TenantSerializer
 )
-from ticketingapp.filters import IsMallAdminFilterBackend
-from ticketingapp.permissions import IsMallAdmin, IsAdmin
+from ticketingapp.permissions import IsAdminUserOrReadOnly
 # Create your views here.
 
 
@@ -30,74 +24,39 @@ class PartialPutMixin(mixins.UpdateModelMixin):
         return super().update(request, *args, **kwargs)
 
 
-class MallViewSet(mixins.RetrieveModelMixin,
-                   PartialPutMixin,
-                   mixins.DestroyModelMixin,
-                   mixins.ListModelMixin,
-                   GenericViewSet):
+class ParkViewSet(ModelViewSet, PartialPutMixin):
     """
-    This endpoint presents the malls in the System
+    This endpoint presents the parks in the System
     """
-    serializer_class = MallSerializer
-    queryset = Mall.objects.all()
-    permission_classes = (IsAdmin,)
-    filter_backends = (IsMallAdminFilterBackend, )
-
-
-class AdminMallViewSet(ModelViewSet, PartialPutMixin):
-    queryset = Mall.objects.all()
-    serializer_class = AdminMallSerializer
-    permission_classes = (permissions.IsAdminUser,)
+    serializer_class = ParkSerializer
+    queryset = Park.objects.all()
+    permission_classes = (permissions.DjangoModelPermissions, )  # Permission controlled by Admin
 
 
 class ParkingTicketViewSet(ModelViewSet, PartialPutMixin):
     serializer_class = ParkingTicketSerializer
     queryset = ParkingTicket.objects.all()
     filter_backends = (DjangoFilterBackend, filters.SearchFilter,)
-    permission_classes = (IsMallAdmin,)
-    filter_fields = ('status',)
+    permission_classes = (IsAdminUserOrReadOnly,)
+    filter_fields = ("status", "plate_number",)  # use status to return only parked cars to users app
     search_fields = ('plate_number',)
 
     def perform_create(self, serializer):
-        mall = Mall.objects.get(id=self.kwargs['mall_pk'])
-        serializer.save(mall=mall)
+        park = Park.objects.get(id=self.kwargs['park_pk'])
+        serializer.save(park=park)
 
     def get_queryset(self):
-        return ParkingTicket.objects.filter(mall=self.kwargs['mall_pk'])
+        return ParkingTicket.objects.filter(park=self.kwargs['park_pk'])
 
 
 class TenantViewset(ModelViewSet, PartialPutMixin):
     serializer_class = TenantSerializer
     queryset = Tenant.objects.all()
 
-
-class UserViewSet(mixins.CreateModelMixin, GenericViewSet):
-    """The API class for creating User."""
-
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = (permissions.IsAdminUser,)
-
-    def create(self, request):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        
-        # Generate api token
-        jwt_payload_handler = jwt_settings.JWT_PAYLOAD_HANDLER
-        jwt_encode_handler = jwt_settings.JWT_ENCODE_HANDLER
-        payload = jwt_payload_handler(user)
-        token = jwt_encode_handler(payload)
-        return Response({'token': token, 'user': serializer.data},
-                        status=status.HTTP_201_CREATED, headers=headers)
-
-    def perform_create(self, serializer):
-        """To return the created user. """
-        return serializer.save()
+    permission_classes = (permissions.DjangoModelPermissions,)  # Permission controlled by Admin
 
 
-
+# TODO: Move to ParkingTicketSerializer
 @api_view(['POST'])
 def pay_ticket(request, ticket_id):
     """
@@ -113,6 +72,7 @@ def pay_ticket(request, ticket_id):
     return Response(serializer.data)
 
 
+# TODO: Move to ParkingTicketSerializer
 @api_view(['GET'])
 def exit_park(request, ticket_id):
     """
@@ -128,17 +88,18 @@ def exit_park(request, ticket_id):
                     status=status.HTTP_400_BAD_REQUEST)
 
 
+# TODO: Move to park serializer
 @api_view(['GET'])
-def payment_details(request, mall_id):
+def payment_details(request, park_id):
     """
-    This endpoint presents the payment information on a mall. It accepts
+    This endpoint presents the payment information on a park. It accepts
     query param "days" to limit the calculated fee to since days specified
     """
-    mall = get_object_or_404(Mall, pk=mall_id)
-    serializer = MallSerializer(mall, context={'request': request})
+    park = get_object_or_404(Park, pk=park_id)
+    serializer = ParkSerializer(park, context={'request': request})
     days = request.query_params.get('days', [None])[0]
     return Response({
-        'paid': mall.get_amount_paid(days),
-        'owned': mall.get_amount_owned(days),
-        'mall': serializer.data
+        'paid': park.get_amount_paid(days),
+        'owned': park.get_amount_owned(days),
+        'park': serializer.data
     })

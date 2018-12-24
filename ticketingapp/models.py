@@ -11,22 +11,24 @@ from django.utils import timezone
 plate_number_validator = RegexValidator("([A-Za-z]{3}\-\d{3}[A-Za-z]{2})", "Plate Number are in the format ABC-123DE")
 STATUS = [('parked', 'parked'), ('exited', 'exited')]
 
+# TODO: Change the local and test database to postgres
 
-class Mall(models.Model):
+
+class Park(models.Model):
     name = models.CharField(max_length=100, unique=True)
     maximum_no_cars = models.IntegerField(default=10)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
-    admin = models.ForeignKey('auth.User', related_name='malls',
-                              on_delete=models.CASCADE, null=True)
+    charge_per_min = models.IntegerField(default=0, null=False, blank=False)
+    first_thirty_free = models.BooleanField(default=False, null=False, blank=False)
 
     def number_of_parked_cars(self):
         return self.parkingtickets.filter(status=STATUS[0][1]).count()
 
     def has_space(self):
-        '''Check if currently parked cars are not more than
+        """Check if currently parked cars are not more than
         maximum_no_cars
-        '''
+        """
         parked_cars = self.parkingtickets.filter(status=STATUS[0][1])
         return parked_cars.count() < (self.maximum_no_cars)
 
@@ -42,6 +44,7 @@ class Mall(models.Model):
         return parked.exists()
 
     def get_amount_paid(self, days=None):
+        # TODO: Use object attr to abstract this function to a util file
         def sum_fee_paid(x, y):
             a = x.fee_paid if issubclass(type(x), models.Model) else x
             b = y.fee_paid if issubclass(type(y), models.Model) else y
@@ -63,8 +66,9 @@ class Mall(models.Model):
 
 class Tenant(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    malls = models.ManyToManyField(
-        Mall, related_name='tenants', blank=True)
+    # TODO: Rename to park
+    parks = models.ForeignKey(Park, related_name="tenants",
+                              on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.name
@@ -73,6 +77,12 @@ class Tenant(models.Model):
         indexes = [
             models.Index(fields=['name'])
         ]
+
+
+class TenantCars(models.Model):
+    plate_number = models.CharField(max_length=9, validators=[plate_number_validator])
+    tenant = models.ForeignKey(Tenant, related_name='cars', on_delete=models.CASCADE)
+    # TODO: Add serializer and viewset for TenantCars
 
 
 class ParkingTicket(models.Model):
@@ -84,13 +94,14 @@ class ParkingTicket(models.Model):
     fee_paid = models.FloatField(default=0.0)
     status = models.CharField(choices=STATUS, default="parked", max_length=7)
     date_modified = models.DateTimeField(auto_now=True)
-    mall = models.ForeignKey(
-        Mall, related_name="parkingtickets", on_delete=models.CASCADE)
+    park = models.ForeignKey(
+        Park, related_name="parkingtickets", on_delete=models.CASCADE)
     tenant = models.ForeignKey(
         Tenant, related_name='tenant_parkingtickets', on_delete=models.CASCADE,
         blank=True, null=True)
 
     def get_ticket_fee(self):
+        # TODO: Use park parking rate to calculate fee
         THIRTY_MIN = 1800
         ONE_HOUR = 3600
         TWO_HOURS = 7200
@@ -130,6 +141,6 @@ class ParkingTicket(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=['plate_number']),
-            models.Index(fields=['mall']),
-            models.Index(fields=['plate_number', 'mall']),
+            models.Index(fields=['park']),
+            models.Index(fields=['plate_number', 'park']),
         ]

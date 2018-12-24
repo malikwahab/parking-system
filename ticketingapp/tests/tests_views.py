@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient, APITestCase
 
-from ticketingapp.models import Mall, ParkingTicket, Tenant
+from ticketingapp.models import Park, ParkingTicket, Tenant
 
 # Create your tests here.
 
@@ -17,12 +17,12 @@ class MallViewSet(APITestCase):
     def setUp(self):
         self.user = User.objects.create(username='testuser', is_staff=True)
         self.client.force_authenticate(user=self.user)
-        self.mall = Mall.objects.create(name='Marryland', admin=self.user)
+        self.mall = Park.objects.create(name='Marryland', admin=self.user)
     
     def tearDown(self):
         self.client.logout()
         User.objects.all().delete()
-        Mall.objects.all().delete()
+        Park.objects.all().delete()
 
     def test_can_create_mall(self):
         url = reverse('admin-mall-list')
@@ -57,8 +57,8 @@ class MallViewSet(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         # assert model deleted
-        with self.assertRaises(Mall.DoesNotExist):
-            Mall.objects.get(pk=mall_id)
+        with self.assertRaises(Park.DoesNotExist):
+            Park.objects.get(pk=mall_id)
 
     def test_payment(self):
         url = reverse('payment-details-route',
@@ -102,7 +102,7 @@ class ParkingTicketTest(APITestCase):
     def setUp(self):
         user = User.objects.create(username='testuser')
         self.client.force_authenticate(user=user)
-        self.mall = Mall.objects.create(name='ICM', admin=user)
+        self.mall = Park.objects.create(name='ICM', admin=user)
         self.parkingticket = ParkingTicket.objects.create(
             plate_number="ZYX-984SD",
             mall=self.mall
@@ -198,7 +198,7 @@ class TenantTest(APITestCase):
     def setUp(self):
         user = User.objects.create(username='testuser')
         self.client.force_authenticate(user=user)
-        self.mall = Mall.objects.create(name='Marryland', admin=user)
+        self.mall = Park.objects.create(name='Marryland', admin=user)
         self.tenant = Tenant.objects.create(
             name='KFC'
         )
@@ -212,7 +212,7 @@ class TenantTest(APITestCase):
     def tearDown(self):
         self.client.logout()
         User.objects.all().delete()
-        Mall.objects.all().delete()
+        Park.objects.all().delete()
         ParkingTicket.objects.all().delete()
         Tenant.objects.all().delete()
 
