@@ -64,9 +64,8 @@ class Park(models.Model):
 
 class Tenant(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    # TODO: Rename to park
-    parks = models.ForeignKey(Park, related_name="tenants",
-                              on_delete=models.CASCADE, null=True)
+    park = models.ForeignKey(Park, related_name="tenants",
+                             on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.name
