@@ -38,7 +38,7 @@ class ParkingTicketViewSet(ModelViewSet, PartialPutMixin):
     queryset = ParkingTicket.objects.all()
     filter_backends = (DjangoFilterBackend, filters.SearchFilter,)
     permission_classes = (IsAdminUserOrReadOnly,)
-    filter_fields = ('status',)
+    filter_fields = ("status", "plate_number",)  # use status to return only parked cars to users app
     search_fields = ('plate_number',)
 
     def perform_create(self, serializer):
@@ -56,6 +56,7 @@ class TenantViewset(ModelViewSet, PartialPutMixin):
     permission_classes = (permissions.DjangoModelPermissions,)  # Permission controlled by Admin
 
 
+# TODO: Move to ParkingTicketSerializer
 @api_view(['POST'])
 def pay_ticket(request, ticket_id):
     """
@@ -71,6 +72,7 @@ def pay_ticket(request, ticket_id):
     return Response(serializer.data)
 
 
+# TODO: Move to ParkingTicketSerializer
 @api_view(['GET'])
 def exit_park(request, ticket_id):
     """
@@ -86,6 +88,7 @@ def exit_park(request, ticket_id):
                     status=status.HTTP_400_BAD_REQUEST)
 
 
+# TODO: Move to park serializer
 @api_view(['GET'])
 def payment_details(request, park_id):
     """

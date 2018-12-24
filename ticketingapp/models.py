@@ -11,6 +11,8 @@ from django.utils import timezone
 plate_number_validator = RegexValidator("([A-Za-z]{3}\-\d{3}[A-Za-z]{2})", "Plate Number are in the format ABC-123DE")
 STATUS = [('parked', 'parked'), ('exited', 'exited')]
 
+# TODO: Change the local and test database to postgres
+
 
 class Park(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -42,6 +44,7 @@ class Park(models.Model):
         return parked.exists()
 
     def get_amount_paid(self, days=None):
+        # TODO: Use object attr to abstract this function to a util file
         def sum_fee_paid(x, y):
             a = x.fee_paid if issubclass(type(x), models.Model) else x
             b = y.fee_paid if issubclass(type(y), models.Model) else y
@@ -63,6 +66,7 @@ class Park(models.Model):
 
 class Tenant(models.Model):
     name = models.CharField(max_length=100, unique=True)
+    # TODO: Rename to park
     parks = models.ForeignKey(Park, related_name="tenants",
                               on_delete=models.CASCADE, null=True)
 
@@ -78,6 +82,7 @@ class Tenant(models.Model):
 class TenantCars(models.Model):
     plate_number = models.CharField(max_length=9, validators=[plate_number_validator])
     tenant = models.ForeignKey(Tenant, related_name='cars', on_delete=models.CASCADE)
+    # TODO: Add serializer and viewset for TenantCars
 
 
 class ParkingTicket(models.Model):
@@ -96,6 +101,7 @@ class ParkingTicket(models.Model):
         blank=True, null=True)
 
     def get_ticket_fee(self):
+        # TODO: Use park parking rate to calculate fee
         THIRTY_MIN = 1800
         ONE_HOUR = 3600
         TWO_HOURS = 7200

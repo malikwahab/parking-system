@@ -5,6 +5,7 @@ from django.utils import timezone
 
 from ticketingapp.models import ParkingTicket, Park
 
+# TODO: Fix the test and write new test
 
 class TestParkingTicket(TestCase):
 
