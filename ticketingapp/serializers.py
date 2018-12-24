@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from ticketingapp.models import ParkingTicket, Mall, Tenant
+from ticketingapp.models import ParkingTicket, Park, Tenant
 
 
 class ParkingTicketSerializer(serializers.ModelSerializer):
@@ -8,40 +8,40 @@ class ParkingTicketSerializer(serializers.ModelSerializer):
     ticket_fee = serializers.ReadOnlyField(source='amount_owed')
 
     def create(self, validated_data):
-        mall = validated_data.get('mall')
+        park = validated_data.get('park')
         tenant = validated_data.get('tenant')
-        if mall.is_parked(validated_data['plate_number']):
+        if park.is_parked(validated_data['plate_number']):
             raise serializers.ValidationError('This car is already parked!')
-        if not mall.has_space():
+        if not park.has_space():
             raise serializers.ValidationError('Mall Park is filled!')
-        if tenant and tenant not in mall.tenants.all():
-            raise serializers.ValidationError('Selected tenant not in mall')
+        if tenant and tenant not in park.tenants.all():
+            raise serializers.ValidationError('Selected tenant not in park')
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
-        mall = validated_data.get('mall')
+        park = validated_data.get('park')
         tenant = validated_data.get('tenant')
-        if tenant and tenant not in mall.tenants.all():
-            raise serializers.ValidationError('Selected tenant not in mall')
+        if tenant and tenant not in park.tenants.all():
+            raise serializers.ValidationError('Selected tenant not in park')
         return super().update(instance, validated_data)
 
     class Meta:
         model = ParkingTicket
         fields = ('id', 'plate_number', 'entry_time', 'date_modified',
-                  'exit_time', 'fee_paid', 'status', 'mall', 'ticket_fee', 'tenant',)
-        read_only_fields = ('exit_time', 'fee_paid', 'status', 'mall',)
-        extra_kwargs = {'mall': {'allow_empty': True, 'required': False}}
+                  'exit_time', 'fee_paid', 'status', 'park', 'ticket_fee', 'tenant',)
+        read_only_fields = ('exit_time', 'fee_paid', 'status', 'park',)
+        extra_kwargs = {'park': {'allow_empty': True, 'required': False}}
 
 
-class MallSerializer(serializers.ModelSerializer):
+class ParkSerializer(serializers.ModelSerializer):
     parkingtickets_url = serializers.HyperlinkedIdentityField(
-        view_name='mall-parkingtickets-list',
+        view_name='park-parkingtickets-list',
         lookup_field='pk',
-        lookup_url_kwarg='mall_pk'
+        lookup_url_kwarg='park_pk'
     )
 
     class Meta:
-        model = Mall
+        model = Park
         fields = ('id', 'name', 'maximum_no_cars', 'date_created', 'date_modified',
                   'parkingtickets_url', 'number_of_parked_cars', 'tenants', 'admin',)
         read_only_fields = ('admin',)

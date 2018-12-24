@@ -12,7 +12,7 @@ plate_number_validator = RegexValidator("([A-Za-z]{3}\-\d{3}[A-Za-z]{2})", "Plat
 STATUS = [('parked', 'parked'), ('exited', 'exited')]
 
 
-class Mall(models.Model):
+class Park(models.Model):
     name = models.CharField(max_length=100, unique=True)
     maximum_no_cars = models.IntegerField(default=10)
     date_created = models.DateTimeField(auto_now_add=True)
@@ -65,7 +65,7 @@ class Mall(models.Model):
 
 class Tenant(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    malls = models.ForeignKey(Mall, related_name="tenants",
+    parks = models.ForeignKey(Park, related_name="tenants",
                               on_delete=models.CASCADE, null=True)
 
     def __str__(self):
@@ -91,8 +91,8 @@ class ParkingTicket(models.Model):
     fee_paid = models.FloatField(default=0.0)
     status = models.CharField(choices=STATUS, default="parked", max_length=7)
     date_modified = models.DateTimeField(auto_now=True)
-    mall = models.ForeignKey(
-        Mall, related_name="parkingtickets", on_delete=models.CASCADE)
+    park = models.ForeignKey(
+        Park, related_name="parkingtickets", on_delete=models.CASCADE)
     tenant = models.ForeignKey(
         Tenant, related_name='tenant_parkingtickets', on_delete=models.CASCADE,
         blank=True, null=True)
@@ -137,6 +137,6 @@ class ParkingTicket(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=['plate_number']),
-            models.Index(fields=['mall']),
-            models.Index(fields=['plate_number', 'mall']),
+            models.Index(fields=['park']),
+            models.Index(fields=['plate_number', 'park']),
         ]

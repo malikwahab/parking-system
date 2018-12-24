@@ -1,6 +1,6 @@
 ## Parking System
 
-Parking System API to manage car parking in malls. Handles fee calculation and provides endpoint to make payment.
+Parking System API to manage car parking in parks. Handles fee calculation and provides endpoint to make payment.
 
 ## Installation
 Clone the repo
@@ -54,9 +54,9 @@ Get a swagger documentation of the API
 GET /schema
 ```
 
-#### Create a mall
+#### Create a park
 ```
-POST /mall
+POST /park
 
 {
   "name": "string",
@@ -67,22 +67,22 @@ POST /mall
 }
 ```
 
-#### Get all malls
+#### Get all parks
 
 ```
-GET /mall
+GET /park
 ```
 
-#### Get a mall
+#### Get a park
 
 ```
-GET /mall/{id}
+GET /park/{id}
 ```
 
-#### Edit a mall
+#### Edit a park
 
 ```
-PUT /mall/{id}
+PUT /park/{id}
 
 {
   "name": "string",
@@ -93,34 +93,34 @@ PUT /mall/{id}
 }
 ```
 
-#### Delete a mall
+#### Delete a park
 
 ```
-DELETE /mall/{id}
+DELETE /park/{id}
 ```
 
-#### Get mall payment details
+#### Get park payment details
 
 Retrive the fee paid and the outstanding ticket fees
 This endpoint accept a query param `days` that specify the number of days back to get payment for, if not specified, the all time payment details will be returned
 ```
-GET /mall/{mall_id}/payment-details?days=1
+GET /park/{park_id}/payment-details?days=1
 ```
 
-#### Get all parking tickets in a mall
+#### Get all parking tickets in a park
 
 ```
-GET /mall/{mall_pk}/parkingtickets/
+GET /park/{park_pk}/parkingtickets/
 ```
 
 #### Create a parking ticket
 
 ```
-POST /mall/{mall_pk}/parkingtickets/
+POST /park/{park_pk}/parkingtickets/
 
 {
   "plate_number": "string",
-  "mall": "string",
+  "park": "string",
   "tenant": "string"
 }
 
@@ -129,17 +129,17 @@ POST /mall/{mall_pk}/parkingtickets/
 #### Get a parking ticket
 
 ```
-GET /mall/{mall_pk}/parkingtickets/{id}/
+GET /park/{park_pk}/parkingtickets/{id}/
 ```
 
 #### Edit a parking ticket
 
 ```
-PUT /mall/{mall_pk}/parkingtickets/{id}/
+PUT /park/{park_pk}/parkingtickets/{id}/
 
 {
   "plate_number": "string",
-  "mall": "string",
+  "park": "string",
   "tenant": "string"
 }
 
@@ -148,7 +148,7 @@ PUT /mall/{mall_pk}/parkingtickets/{id}/
 #### Delete a parking ticket
 
 ```
-DELETE /mall/{mall_pk}/parkingtickets/{id}/
+DELETE /park/{park_pk}/parkingtickets/{id}/
 ```
 
 #### Make payment for a parking ticket
@@ -169,11 +169,11 @@ GET /exit/{ticket_id}/
 
 #### Create a tenant
 ```
-POST /mall/{mall_pk}/tenants/
+POST /park/{park_pk}/tenants/
 
 {
   "name": "string",
-  "malls": [
+  "parks": [
     "string"
   ]
 }
@@ -182,20 +182,20 @@ POST /mall/{mall_pk}/tenants/
 
 #### Get all tenants
 ```
-GET /mall/{mall_pk}/tenants/
+GET /park/{park_pk}/tenants/
 ```
 
 #### Get a tenant
 ```
-GET /mall/{mall_pk}/tenants/{id}
+GET /park/{park_pk}/tenants/{id}
 ```
 
 #### Edit a tenant
 ```
-PUT /mall/{mall_pk}/tenants/{id}/
+PUT /park/{park_pk}/tenants/{id}/
 ```
 
 #### Delete a tenant
 ```
-DELETE /mall/{mall_pk}/tenants/{id}/
+DELETE /park/{park_pk}/tenants/{id}/
 ```

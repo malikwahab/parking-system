@@ -7,14 +7,14 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status, filters, mixins, permissions
 
-from ticketingapp.models import ParkingTicket, Mall, Tenant
+from ticketingapp.models import ParkingTicket, Park, Tenant
 from ticketingapp.serializers import (
     ParkingTicketSerializer,
-    MallSerializer,
+    ParkSerializer,
     TenantSerializer
 )
-from ticketingapp.filters import IsMallAdminFilterBackend
-from ticketingapp.permissions import IsMallAdmin, IsAdmin
+from ticketingapp.filters import IsParkAdminFilterBackend
+from ticketingapp.permissions import IsParkAdmin, IsAdmin
 # Create your views here.
 
 
@@ -25,34 +25,34 @@ class PartialPutMixin(mixins.UpdateModelMixin):
         return super().update(request, *args, **kwargs)
 
 
-class MallViewSet(mixins.RetrieveModelMixin,
-                   PartialPutMixin,
-                   mixins.DestroyModelMixin,
-                   mixins.ListModelMixin,
-                   GenericViewSet):
+class ParkViewSet(mixins.RetrieveModelMixin,
+                  PartialPutMixin,
+                  mixins.DestroyModelMixin,
+                  mixins.ListModelMixin,
+                  GenericViewSet):
     """
-    This endpoint presents the malls in the System
+    This endpoint presents the parks in the System
     """
-    serializer_class = MallSerializer
-    queryset = Mall.objects.all()
+    serializer_class = ParkSerializer
+    queryset = Park.objects.all()
     permission_classes = (permissions.IsAuthenticated, IsAdmin,)
-    filter_backends = (IsMallAdminFilterBackend, )
+    filter_backends = (IsParkAdminFilterBackend,)
 
 
 class ParkingTicketViewSet(ModelViewSet, PartialPutMixin):
     serializer_class = ParkingTicketSerializer
     queryset = ParkingTicket.objects.all()
     filter_backends = (DjangoFilterBackend, filters.SearchFilter,)
-    permission_classes = (IsMallAdmin,)
+    permission_classes = (IsParkAdmin,)
     filter_fields = ('status',)
     search_fields = ('plate_number',)
 
     def perform_create(self, serializer):
-        mall = Mall.objects.get(id=self.kwargs['mall_pk'])
-        serializer.save(mall=mall)
+        park = Park.objects.get(id=self.kwargs['park_pk'])
+        serializer.save(park=park)
 
     def get_queryset(self):
-        return ParkingTicket.objects.filter(mall=self.kwargs['mall_pk'])
+        return ParkingTicket.objects.filter(park=self.kwargs['park_pk'])
 
 
 class TenantViewset(ModelViewSet, PartialPutMixin):
@@ -91,16 +91,16 @@ def exit_park(request, ticket_id):
 
 
 @api_view(['GET'])
-def payment_details(request, mall_id):
+def payment_details(request, park_id):
     """
-    This endpoint presents the payment information on a mall. It accepts
+    This endpoint presents the payment information on a park. It accepts
     query param "days" to limit the calculated fee to since days specified
     """
-    mall = get_object_or_404(Mall, pk=mall_id)
-    serializer = MallSerializer(mall, context={'request': request})
+    park = get_object_or_404(Park, pk=park_id)
+    serializer = ParkSerializer(park, context={'request': request})
     days = request.query_params.get('days', [None])[0]
     return Response({
-        'paid': mall.get_amount_paid(days),
-        'owned': mall.get_amount_owned(days),
-        'mall': serializer.data
+        'paid': park.get_amount_paid(days),
+        'owned': park.get_amount_owned(days),
+        'park': serializer.data
     })

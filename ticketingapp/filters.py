@@ -1,7 +1,7 @@
 from rest_framework import filters
 
 
-class IsMallAdminFilterBackend(filters.BaseFilterBackend):
+class IsParkAdminFilterBackend(filters.BaseFilterBackend):
     """
     Filter that only allows users to see their own objects.
     """

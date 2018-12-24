@@ -1,5 +1,5 @@
 from rest_framework import permissions
-from ticketingapp.models import Mall
+from ticketingapp.models import Park
 
 
 class IsAdmin(permissions.BasePermission):
@@ -9,14 +9,14 @@ class IsAdmin(permissions.BasePermission):
         return obj.admin == request.user
 
 
-class IsMallAdmin(IsAdmin):
-    """Filters that allow only mall owner to see parkedcars
+class IsParkAdmin(IsAdmin):
+    """Filters that allow only park owner to see parkedcars
     """
 
     def has_permission(self, request, views):
-        mall = Mall.objects.get(id=views.kwargs['mall_pk'])
-        return super().has_object_permission(request, views, mall)
+        park = Park.objects.get(id=views.kwargs['park_pk'])
+        return super().has_object_permission(request, views, park)
 
     def has_object_permission(self, request, views, obj):
-        mall = obj.mall
-        return super().has_object_permission(request, views, mall)
+        park = obj.park
+        return super().has_object_permission(request, views, park)
