@@ -40,12 +40,13 @@ class ParkSerializer(serializers.ModelSerializer):
         lookup_url_kwarg='park_pk'
     )
 
+    # Todo: Add available space to the serializer
+
     class Meta:
         model = Park
         fields = ('id', 'name', 'maximum_no_cars', 'date_created', 'date_modified',
-                  'parkingtickets_url', 'number_of_parked_cars', 'tenants', 'admin',)
-        read_only_fields = ('admin',)
-        extra_kwargs = {'tenants': {'allow_empty': True, 'required': False}}
+                  'parkingtickets_url', 'number_of_parked_cars', 'tenants',)
+        read_only_fields = ('tenants',)
 
 
 class TenantSerializer(serializers.ModelSerializer):

@@ -17,8 +17,6 @@ class Park(models.Model):
     maximum_no_cars = models.IntegerField(default=10)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
-    admin = models.ForeignKey('auth.User', related_name='malls',
-                              on_delete=models.CASCADE, null=True)
     charge_per_min = models.IntegerField(default=0, null=False, blank=False)
     first_thirty_free = models.BooleanField(default=False, null=False, blank=False)
 

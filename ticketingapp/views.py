@@ -13,8 +13,7 @@ from ticketingapp.serializers import (
     ParkSerializer,
     TenantSerializer
 )
-from ticketingapp.filters import IsParkAdminFilterBackend
-from ticketingapp.permissions import IsParkAdmin, IsAdmin
+from ticketingapp.permissions import IsAdminUserOrReadOnly
 # Create your views here.
 
 
@@ -25,25 +24,20 @@ class PartialPutMixin(mixins.UpdateModelMixin):
         return super().update(request, *args, **kwargs)
 
 
-class ParkViewSet(mixins.RetrieveModelMixin,
-                  PartialPutMixin,
-                  mixins.DestroyModelMixin,
-                  mixins.ListModelMixin,
-                  GenericViewSet):
+class ParkViewSet(ModelViewSet, PartialPutMixin):
     """
     This endpoint presents the parks in the System
     """
     serializer_class = ParkSerializer
     queryset = Park.objects.all()
-    permission_classes = (permissions.IsAuthenticated, IsAdmin,)
-    filter_backends = (IsParkAdminFilterBackend,)
+    permission_classes = (permissions.DjangoModelPermissions, )  # Permission controlled by Admin
 
 
 class ParkingTicketViewSet(ModelViewSet, PartialPutMixin):
     serializer_class = ParkingTicketSerializer
     queryset = ParkingTicket.objects.all()
     filter_backends = (DjangoFilterBackend, filters.SearchFilter,)
-    permission_classes = (IsParkAdmin,)
+    permission_classes = (IsAdminUserOrReadOnly,)
     filter_fields = ('status',)
     search_fields = ('plate_number',)
 
@@ -58,6 +52,8 @@ class ParkingTicketViewSet(ModelViewSet, PartialPutMixin):
 class TenantViewset(ModelViewSet, PartialPutMixin):
     serializer_class = TenantSerializer
     queryset = Tenant.objects.all()
+
+    permission_classes = (permissions.DjangoModelPermissions,)  # Permission controlled by Admin
 
 
 @api_view(['POST'])
