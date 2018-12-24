@@ -11,8 +11,6 @@ from django.utils import timezone
 plate_number_validator = RegexValidator("([A-Za-z]{3}\-\d{3}[A-Za-z]{2})", "Plate Number are in the format ABC-123DE")
 STATUS = [('parked', 'parked'), ('exited', 'exited')]
 
-# TODO: Change the local and test database to postgres
-
 
 class Park(models.Model):
     name = models.CharField(max_length=100, unique=True)

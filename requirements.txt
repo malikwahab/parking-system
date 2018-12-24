@@ -22,6 +22,7 @@ openapi-codec==1.3.2
 psycopg2==2.7.4
 PyJWT==1.6.4
 pylint==2.0.1
+python-dotenv==0.10.1
 pytz==2018.3
 requests==2.21.0
 simplejson==3.13.2
