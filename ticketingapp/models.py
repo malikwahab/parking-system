@@ -6,8 +6,6 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.utils import timezone
 
-# Create your models here.
-
 plate_number_validator = RegexValidator("([A-Za-z]{3}\-\d{3}[A-Za-z]{2})", "Plate Number are in the format ABC-123DE")
 STATUS = [('parked', 'parked'), ('exited', 'exited')]
 
@@ -32,7 +30,7 @@ class Park(models.Model):
     maximum_no_cars = models.IntegerField(default=10)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
-    charge_per_min = models.IntegerField(default=0, null=False, blank=False)
+    charge_per_min = models.FloatField(default=0, null=False, blank=False)
     first_thirty_free = models.BooleanField(default=False, null=False, blank=False)
 
     def number_of_parked_cars(self):
@@ -110,20 +108,14 @@ class ParkingTicket(models.Model):
         blank=True, null=True)
 
     def get_ticket_fee(self):
-        # TODO: Use park parking rate to calculate fee
         THIRTY_MIN = 1800
-        ONE_HOUR = 3600
-        TWO_HOURS = 7200
-
         stayed_time = timezone.now() - self.entry_time
         stayed_time_seconds = stayed_time.total_seconds()
 
-        if stayed_time_seconds <= THIRTY_MIN:
+        # left park within the first 30 minutes
+        if self.park.first_thirty_free and stayed_time_seconds <= THIRTY_MIN:
             return 0.0
-        elif stayed_time_seconds <= TWO_HOURS:
-            return math.ceil(stayed_time_seconds/ONE_HOUR) * 200
-        else:
-            return 400.0 + math.ceil((stayed_time_seconds - TWO_HOURS) / ONE_HOUR) * 100
+        return math.ceil(stayed_time_seconds/60) * self.park.charge_per_min
 
     def checkout(self):
         if not self.checkout_time:
