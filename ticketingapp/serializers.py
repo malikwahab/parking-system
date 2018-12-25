@@ -39,22 +39,13 @@ class ParkSerializer(serializers.ModelSerializer):
         lookup_field='pk',
         lookup_url_kwarg='park_pk'
     )
-
-    # Todo: Add available space to the serializer
+    available_space = serializers.ReadOnlyField()
 
     class Meta:
         model = Park
         fields = ('id', 'name', 'maximum_no_cars', 'date_created', 'date_modified',
-                  'parkingtickets_url', 'number_of_parked_cars', 'tenants',)
+                  'parkingtickets_url', 'number_of_parked_cars', 'tenants','available_space',)
         read_only_fields = ('tenants',)
-
-
-class TenantSerializer(serializers.ModelSerializer):
-
-    # TODO: return TenantCars
-    class Meta:
-        model = Tenant
-        fields = '__all__'
 
 
 class TenantCarSerializer(serializers.ModelSerializer):
@@ -64,3 +55,10 @@ class TenantCarSerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {'tenant': {'required': False}}
 
+
+class TenantSerializer(serializers.ModelSerializer):
+    cars = TenantCarSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Tenant
+        fields = '__all__'

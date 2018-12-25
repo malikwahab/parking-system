@@ -50,8 +50,7 @@ class ParkingTicketViewSet(ModelViewSet, PartialPutMixin):
         return ParkingTicket.objects.filter(park=self.kwargs['park_pk'])
 
 
-# TODO: Rename Viewset to ViewSet
-class TenantViewset(ModelViewSet, PartialPutMixin):
+class TenantViewSet(ModelViewSet, PartialPutMixin):
     serializer_class = TenantSerializer
     queryset = Tenant.objects.all()
 

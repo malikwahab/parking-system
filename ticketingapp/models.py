@@ -27,8 +27,12 @@ class Park(models.Model):
         """Check if currently parked cars are not more than
         maximum_no_cars
         """
+        return self.available_space() > 0
+
+    def available_space(self):
+        """The number of space left."""
         parked_cars = self.parkingtickets.filter(status=STATUS[0][1])
-        return parked_cars.count() < (self.maximum_no_cars)
+        return self.maximum_no_cars - parked_cars.count()
 
     def get_days_specific_parkingtickets(self, days=None):
         if not days:
