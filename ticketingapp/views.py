@@ -2,8 +2,8 @@ from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework.viewsets import ModelViewSet, GenericViewSet
-from rest_framework.decorators import api_view
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status, filters, mixins, permissions
 
@@ -79,15 +79,31 @@ class TenantCarViewSet(ModelViewSet, PartialPutMixin):
         return tenant_cars.filter(tenant=self.kwargs["tenant_pk"])
 
 
-# TODO: Move to ParkingTicketSerializer
+# Views below were added just to use @api_view
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAdminUser,])
+def check_out(request, ticket_id):
+    """The view for checking out a ticket before paying."""
+    parkingticket = get_object_or_404(ParkingTicket, pk=ticket_id)
+    fee = parkingticket.checkout()
+    serializer = ParkingTicketSerializer(
+        parkingticket, context={'request': request})
+    return Response({
+        "fee": fee,
+        "ticket": serializer.data
+    })
+
+
 @api_view(['POST'])
+@permission_classes([permissions.IsAdminUser,])
 def pay_ticket(request, ticket_id):
     """
     This endpoint is to make payment for parking tickets
     You can also make partial payment
     """
     parkingticket = get_object_or_404(ParkingTicket, pk=ticket_id)
-    parkingticket.checkout()  # TODO: refactor checkout logic
+    parkingticket.checkout()
     fee_paid = float(request.data['fee_paid'])
     parkingticket.pay_ticket(fee_paid)
     serializer = ParkingTicketSerializer(
@@ -95,7 +111,6 @@ def pay_ticket(request, ticket_id):
     return Response(serializer.data)
 
 
-# TODO: Move to ParkingTicketSerializer
 @api_view(['GET'])
 def exit_park(request, ticket_id):
     """
@@ -111,8 +126,8 @@ def exit_park(request, ticket_id):
                     status=status.HTTP_400_BAD_REQUEST)
 
 
-# TODO: Move to park serializer
 @api_view(['GET'])
+@permission_classes([permissions.IsAdminUser,])
 def payment_details(request, park_id):
     """
     This endpoint presents the payment information on a park. It accepts

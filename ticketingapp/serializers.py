@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from ticketingapp.models import ParkingTicket, Park, Tenant, TenantCars
 
-# TODO: Fix the parking Ticket Serializers
+
 class ParkingTicketSerializer(serializers.ModelSerializer):
     # accumulated_ticket_fee
     ticket_fee = serializers.ReadOnlyField(source='amount_owed')
@@ -40,11 +40,13 @@ class ParkSerializer(serializers.ModelSerializer):
         lookup_url_kwarg='park_pk'
     )
     available_space = serializers.ReadOnlyField()
+    total_paid = serializers.ReadOnlyField(source="get_amount_paid")
+    total_outstanding = serializers.ReadOnlyField(source="get_amount_owned")
+    number_of_parked_cars = serializers.ReadOnlyField()
 
     class Meta:
         model = Park
-        fields = ('id', 'name', 'maximum_no_cars', 'date_created', 'date_modified',
-                  'parkingtickets_url', 'number_of_parked_cars', 'tenants','available_space',)
+        fields = '__all__'
         read_only_fields = ('tenants',)
 
 
