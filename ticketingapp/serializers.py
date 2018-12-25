@@ -1,8 +1,8 @@
 from rest_framework import serializers
 
-from ticketingapp.models import ParkingTicket, Park, Tenant
+from ticketingapp.models import ParkingTicket, Park, Tenant, TenantCars
 
-
+# TODO: Fix the parking Ticket Serializers
 class ParkingTicketSerializer(serializers.ModelSerializer):
     # accumulated_ticket_fee
     ticket_fee = serializers.ReadOnlyField(source='amount_owed')
@@ -51,6 +51,16 @@ class ParkSerializer(serializers.ModelSerializer):
 
 class TenantSerializer(serializers.ModelSerializer):
 
+    # TODO: return TenantCars
     class Meta:
         model = Tenant
         fields = '__all__'
+
+
+class TenantCarSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TenantCars
+        fields = '__all__'
+        extra_kwargs = {'tenant': {'required': False}}
+

@@ -7,13 +7,14 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status, filters, mixins, permissions
 
-from ticketingapp.models import ParkingTicket, Park, Tenant
+from ticketingapp.models import ParkingTicket, Park, Tenant, TenantCars
 from ticketingapp.serializers import (
     ParkingTicketSerializer,
     ParkSerializer,
-    TenantSerializer
+    TenantSerializer,
+    TenantCarSerializer
 )
-from ticketingapp.permissions import IsAdminUserOrReadOnly
+from ticketingapp.permissions import IsAdminUserOrReadOnly, IsTenantAdmin, CanCRUDTenantCar
 # Create your views here.
 
 
@@ -49,11 +50,34 @@ class ParkingTicketViewSet(ModelViewSet, PartialPutMixin):
         return ParkingTicket.objects.filter(park=self.kwargs['park_pk'])
 
 
+# TODO: Rename Viewset to ViewSet
 class TenantViewset(ModelViewSet, PartialPutMixin):
     serializer_class = TenantSerializer
     queryset = Tenant.objects.all()
 
-    permission_classes = (permissions.DjangoModelPermissions,)  # Permission controlled by Admin
+    permission_classes = (permissions.DjangoModelPermissions, IsTenantAdmin)  # Permission controlled by Admin
+
+    def get_queryset(self):
+        tenants = super().get_queryset()
+        if self.request.user.is_staff:
+            return tenants
+        return tenants.filter(admins__in=(self.request.user,))
+
+
+class TenantCarViewSet(ModelViewSet, PartialPutMixin):
+    serializer_class = TenantCarSerializer
+    queryset = TenantCars.objects.all()
+    permission_classes = (permissions.DjangoModelPermissions, CanCRUDTenantCar,)
+
+    def perform_create(self, serializer):
+        tenant = Tenant.objects.get(id=self.kwargs["tenant_pk"])
+        serializer.save(tenant=tenant)
+
+    def get_queryset(self):
+        tenant_cars = super().get_queryset()
+        if self.request.user.is_staff:
+            return tenant_cars
+        return tenant_cars.filter(tenant=self.kwargs["tenant_pk"])
 
 
 # TODO: Move to ParkingTicketSerializer

@@ -66,6 +66,7 @@ class Tenant(models.Model):
     name = models.CharField(max_length=100, unique=True)
     park = models.ForeignKey(Park, related_name="tenants",
                              on_delete=models.CASCADE, null=True)
+    admins = models.ManyToManyField("auth.User", related_name="tenant", blank=True)
 
     def __str__(self):
         return self.name
@@ -79,7 +80,6 @@ class Tenant(models.Model):
 class TenantCars(models.Model):
     plate_number = models.CharField(max_length=9, validators=[plate_number_validator])
     tenant = models.ForeignKey(Tenant, related_name='cars', on_delete=models.CASCADE)
-    # TODO: Add serializer and viewset for TenantCars
 
 
 class ParkingTicket(models.Model):

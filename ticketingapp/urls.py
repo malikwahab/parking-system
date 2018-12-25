@@ -6,6 +6,7 @@ from rest_framework_jwt.views import obtain_jwt_token
 from ticketingapp.views import (ParkViewSet,
                                 ParkingTicketViewSet,
                                 TenantViewset,
+                                TenantCarViewSet,
                                 pay_ticket,
                                 exit_park,
                                 payment_details)
@@ -17,6 +18,9 @@ park_router = NestedSimpleRouter(router, 'park', lookup='park')
 park_router.register('parkingtickets', ParkingTicketViewSet, base_name='park-parkingtickets')
 park_router.register('tenants', TenantViewset, base_name='park-tenants')
 
+tenant_router = NestedSimpleRouter(park_router, 'tenants', lookup="tenant")
+tenant_router.register("tenant-cars", TenantCarViewSet, base_name="tenant_cars")
+
 urlpatterns = [
     path('pay-ticket/<int:ticket_id>',
          pay_ticket, name="payment-route"),
@@ -26,5 +30,6 @@ urlpatterns = [
     path('auth-users', obtain_jwt_token),
 
     *router.urls,
-    *park_router.urls
+    *park_router.urls,
+    *tenant_router.urls
 ]
