@@ -40,8 +40,8 @@ class ParkSerializer(serializers.ModelSerializer):
         lookup_url_kwarg='park_pk'
     )
     available_space = serializers.ReadOnlyField()
-    total_paid = serializers.ReadOnlyField(source="get_amount_paid")
-    total_outstanding = serializers.ReadOnlyField(source="get_amount_owned")
+    total_amount_paid = serializers.ReadOnlyField(source="get_amount_paid")
+    total_amount_owned = serializers.ReadOnlyField(source="get_amount_owned")
     number_of_parked_cars = serializers.ReadOnlyField()
 
     class Meta:

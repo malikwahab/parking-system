@@ -12,6 +12,21 @@ plate_number_validator = RegexValidator("([A-Za-z]{3}\-\d{3}[A-Za-z]{2})", "Plat
 STATUS = [('parked', 'parked'), ('exited', 'exited')]
 
 
+def get_fee(x, z=None):
+    """Just because I can? ¯\_(ツ)_/¯ """
+    if not z:
+        return x
+    attr_x = getattr(x, z)
+    return attr_x() if callable(attr_x) else attr_x
+
+
+def reduce_fee(x, y, z=None):
+    """Just because I can? ¯\_(ツ)_/¯ """
+    a = get_fee(x, z) if issubclass(type(x), models.Model) else x
+    b = get_fee(y, z) if issubclass(type(y), models.Model) else y
+    return a + b
+
+
 class Park(models.Model):
     name = models.CharField(max_length=100, unique=True)
     maximum_no_cars = models.IntegerField(default=10)
@@ -46,19 +61,12 @@ class Park(models.Model):
         return parked.exists()
 
     def get_amount_paid(self, days=None):
-        # TODO: Use object attr to abstract this function to a util file
-        def sum_fee_paid(x, y):
-            a = x.fee_paid if issubclass(type(x), models.Model) else x
-            b = y.fee_paid if issubclass(type(y), models.Model) else y
-            return a + b
+        sum_fee_paid = functools.partial(reduce_fee, z="fee_paid")
         parkingtickets = self.get_days_specific_parkingtickets(days)
         return functools.reduce(sum_fee_paid, parkingtickets, 0.0)
 
     def get_amount_owned(self, days=None):
-        def sum_amount_owned(x, y):
-            a = x.amount_owed() if issubclass(type(x), models.Model) else x
-            b = y.amount_owed() if issubclass(type(y), models.Model) else y
-            return a + b
+        sum_amount_owned = functools.partial(reduce_fee, z="amount_owed")
         parkingtickets = self.get_days_specific_parkingtickets(days)
         return functools.reduce(sum_amount_owned, parkingtickets, 0.0)
 
